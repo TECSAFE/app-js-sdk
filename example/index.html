@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>TECSAFE Demo</title>
+</head>
+<body>
+
+<div id="widget"></div>
+
+<button id="token">Token</button>
+<button id="destroy">Destroy</button>
+
+<script src="../dist/bundle.js"></script>
+
+</body>
+<script type="module">
+    const api = await TecsafeSdk.initializeTecsafeApi(async () => {
+        // async own shop backend get token
+        console.log('get token');
+        return Math.random().toString(36).slice(2, 7);
+    });
+
+    const widgetWrapper = document.getElementById('widget');
+    const tokenButton = document.getElementById('token');
+    const destroyButton = document.getElementById('destroy');
+
+    const widget = api.cartWidget(widgetWrapper);
+
+    destroyButton.addEventListener('click', () => {
+        widget.destroy();
+    });
+
+    tokenButton.addEventListener('click', () => {
+        api.reloadToken();
+    });
+</script>
+</html>
