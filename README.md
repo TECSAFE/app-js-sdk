@@ -8,16 +8,14 @@ The TECSAFE App-JS-SDK provides a convenience wrapper to interact with the TECSA
 
 ```js
 const api = await TecsafeSdk.initializeTecsafeApi(async () => {
-    const response = await fetch('https://mybackend.com/tecsafe/token');
-    const json = await response.json();
-    
-    return json.token;
+  const response = await fetch("https://mybackend.com/tecsafe/token");
+  const json = await response.json();
+
+  return json.token;
 });
 ```
 
 #### Error Handling
-
-
 
 ### Get the current user
 
@@ -36,7 +34,7 @@ api.logout();
 ### Create a product detail widget
 
 ```js
-const widgetWrapper = document.getElementById('product-detail-widget');
+const widgetWrapper = document.getElementById("product-detail-widget");
 const productWidget = api.productDetailWidget(widgetWrapper);
 ```
 
@@ -51,7 +49,7 @@ productWidget.destroy();
 ### Create a cart widget
 
 ```js
-const widgetWrapper = document.getElementById('cart-widget');
+const widgetWrapper = document.getElementById("cart-widget");
 const cartWidget = api.cartWidget(widgetWrapper);
 ```
 

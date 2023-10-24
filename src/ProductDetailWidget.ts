@@ -1,66 +1,64 @@
 import TecsafeApi from "./TecsafeApi";
-import {ContainerId, CustomerToken, EAN} from "./CommonTypes";
+import { ContainerId, CustomerToken, EAN } from "./CommonTypes";
 
 export default class ProductDetailWidget {
-    private api: TecsafeApi;
-    private customerToken: CustomerToken | null = null;
-    private element: HTMLElement;
-    private iframe: HTMLIFrameElement | null = null;
-    private insertArticles: EAN[];
-    private containerId: ContainerId;
+  private api: TecsafeApi;
+  private customerToken: CustomerToken | null = null;
+  private element: HTMLElement;
+  private iframe: HTMLIFrameElement | null = null;
+  private insertArticles: EAN[];
+  private containerId: ContainerId;
 
-    constructor(
-        api: TecsafeApi,
-        element: HTMLElement,
-        insertArticles: EAN[],
-        containerId: ContainerId,
-    ) {
-        this.api = api;
-        this.element = element;
-        this.insertArticles = insertArticles;
-        this.containerId = containerId;
+  constructor(
+    api: TecsafeApi,
+    element: HTMLElement,
+    insertArticles: EAN[],
+    containerId: ContainerId,
+  ) {
+    this.api = api;
+    this.element = element;
+    this.insertArticles = insertArticles;
+    this.containerId = containerId;
 
-        this.api.on('customerTokenChanged', this.updateCustomerToken);
+    this.api.on("customerTokenChanged", this.updateCustomerToken);
 
-        this.updateCustomerToken(this.api.getCustomerToken());
+    this.updateCustomerToken(this.api.getCustomerToken());
+  }
+
+  destroy() {
+    this.api.off("customerTokenChanged", this.updateCustomerToken);
+    this.iframe = null;
+    this.element.innerHTML = "destroyed!";
+  }
+
+  updateCustomerToken(customerToken: CustomerToken | null) {
+    this.customerToken = customerToken;
+
+    if (customerToken) {
+      this.buildIframe();
+    } else {
+      this.buildBanner();
     }
+  }
 
-    destroy() {
-        this.api.off('customerTokenChanged', this.updateCustomerToken);
-        this.iframe = null;
-        this.element.innerHTML = 'destroyed!';
-    }
+  private buildIframe() {
+    this.element.innerHTML = ""; // remove all children
+    this.iframe = document.createElement("iframe");
+    this.iframe.src = `${this.api.APP_URL}/iframe/?customerToken=${this.customerToken}`;
+    this.iframe.style.width = "100%";
+    this.iframe.style.height = "100%";
 
-    updateCustomerToken(customerToken: CustomerToken | null) {
-        this.customerToken = customerToken;
+    this.element.appendChild(this.iframe);
+  }
 
-        if (customerToken) {
-            this.buildIframe();
-        } else {
-            this.buildBanner();
-        }
-    }
+  private buildBanner() {
+    this.element.innerHTML = ""; // remove all children
+    this.iframe = null;
+    const button = document.createElement("button");
 
-    private buildIframe() {
-        this.element.innerHTML = ''; // remove all children
-        this.iframe = document.createElement('iframe');
-        this.iframe.src = `${this.api.APP_URL}/iframe/?customerToken=${this.customerToken}`;
-        this.iframe.style.width = '100%';
-        this.iframe.style.height = '100%';
+    button.innerText = "Activate";
+    button.onclick = () => {};
 
-        this.element.appendChild(this.iframe);
-    }
-
-    private buildBanner() {
-        this.element.innerHTML = ''; // remove all children
-        this.iframe = null;
-        const button = document.createElement('button');
-
-        button.innerText = 'Activate';
-        button.onclick = () => {
-
-        }
-
-        this.element.appendChild(button);
-    }
+    this.element.appendChild(button);
+  }
 }

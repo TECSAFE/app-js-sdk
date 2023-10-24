@@ -1,19 +1,19 @@
 import TecsafeApi from "./TecsafeApi";
-import {CustomerToken} from "./CommonTypes";
+import { CustomerToken } from "./CommonTypes";
 
 export interface GetCustomerTokenCallback {
-    (): Promise<CustomerToken>;
+  (): Promise<CustomerToken>;
 }
 
 export async function initializeTecsafeApi(
-    getCustomerTokenCallback: GetCustomerTokenCallback,
+  getCustomerTokenCallback: GetCustomerTokenCallback,
 ): Promise<TecsafeApi> {
-    const api = new TecsafeApi(getCustomerTokenCallback);
-    await api.initialize();
+  const api = new TecsafeApi(getCustomerTokenCallback);
+  await api.initialize();
 
-    return api;
+  return api;
 }
 
 export default {
-    initializeTecsafeApi
-}
+  initializeTecsafeApi,
+};
