@@ -28,16 +28,7 @@ export default class TecsafeApi {
   }
 
   async initialize() {
-    this.customerToken = sessionStorage.getItem(
-      this.sessionStorageKey,
-    ) as CustomerToken | null;
-
-    if (!this.customerToken) {
-      this.customerToken = await this.getCustomerTokenCallback();
-      sessionStorage.setItem(this.sessionStorageKey, this.customerToken);
-    }
-
-    this.eventEmitter.emit("customerTokenChanged", this.customerToken);
+    await this.reloadToken();
   }
 
   productDetailWidget(
@@ -52,15 +43,19 @@ export default class TecsafeApi {
     return new CartWidget(this, element);
   }
 
-  async reloadToken() {
-    this.customerToken = await this.getCustomerTokenCallback();
-    sessionStorage.setItem("tecsafe-customer-token", this.customerToken);
-    this.eventEmitter.emit("customerTokenChanged", this.customerToken);
+  async reloadToken(): Promise<void> {
+    try {
+      this.customerToken = await this.getCustomerTokenCallback();
+      this.eventEmitter.emit("customerTokenChanged", this.customerToken);
+    } catch (e) {
+      this.customerToken = null;
+      this.eventEmitter.emit("customerTokenChanged", null);
+      throw e;
+    }
   }
 
   logout() {
     this.customerToken = null;
-    sessionStorage.removeItem("tecsafe-customer-token");
     this.eventEmitter.emit("customerTokenChanged", null);
   }
 
