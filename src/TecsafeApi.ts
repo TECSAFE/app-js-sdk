@@ -4,11 +4,7 @@ import ProductDetailWidget from "./ProductDetailWidget";
 import CartWidget from "./CartWidget";
 import {GetCustomerTokenCallback} from "./index";
 import {ServerToClientMessage} from "./IframeMessage";
-
-export type EAN = "string";
-export type ItemId = "string";
-export type ContainerId = "string";
-export type CustomerToken = "string";
+import {ContainerId, CustomerToken, EAN, ItemId} from "./CommonTypes";
 
 export default class TecsafeApi {
     private httpClient: HttpClient;

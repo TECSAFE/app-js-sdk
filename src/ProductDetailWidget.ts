@@ -1,4 +1,5 @@
-import TecsafeApi, {ContainerId, CustomerToken, EAN} from "./TecsafeApi";
+import TecsafeApi from "./TecsafeApi";
+import {ContainerId, CustomerToken, EAN} from "./CommonTypes";
 
 export default class ProductDetailWidget {
     private api: TecsafeApi;

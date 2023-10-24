@@ -1,4 +1,4 @@
-import {CustomerToken, ItemId} from "./TecsafeApi";
+import {CustomerToken, ItemId} from "./CommonTypes";
 
 export type ServerToClientMessage = AddToCartMessage|RemoveFromCartMessage|ChangeCartQuantityMessage;
 

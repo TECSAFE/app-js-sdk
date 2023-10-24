@@ -1,5 +1,6 @@
-import TecsafeApi, {CustomerToken, ListenerRemover} from "./TecsafeApi";
+import TecsafeApi, {ListenerRemover} from "./TecsafeApi";
 import {ClientToServerMessage} from "./IframeMessage";
+import {CustomerToken} from "./CommonTypes";
 
 export default class CartWidget {
     private api: TecsafeApi;

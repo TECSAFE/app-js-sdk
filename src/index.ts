@@ -1,4 +1,5 @@
-import TecsafeApi, {CustomerToken} from "./TecsafeApi";
+import TecsafeApi from "./TecsafeApi";
+import {CustomerToken} from "./CommonTypes";
 
 export interface GetCustomerTokenCallback {
     (): Promise<CustomerToken>;
