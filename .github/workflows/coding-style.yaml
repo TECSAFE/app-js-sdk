@@ -11,7 +11,7 @@ on:
 
 jobs:
   cs:
-    name: "code style"
+    name: "js"
     runs-on: ubuntu-latest
 
     steps:
