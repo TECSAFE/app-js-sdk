@@ -21,18 +21,34 @@ const api = await TecsafeSdk.initializeTecsafeApi(async () => {
 api.reloadToken();
 ```
 
+## Product Detail Usage
+
+### Create a product detail widget
+
+```js
+const widgetWrapper = document.getElementById('product-detail-widget');
+const productWidget = api.productDetailWidget(widgetWrapper);
+```
+
+### destroy product detail widget
+
+```js
+productWidget.destroy();
+```
+
 ## Cart Usage
 
 ### Create a cart widget
 
 ```js
-const widget = api.cartWidget(widgetWrapper);
+const widgetWrapper = document.getElementById('cart-widget');
+const cartWidget = api.cartWidget(widgetWrapper);
 ```
 
 ### destroy cart widget
 
 ```js
-widget.destroy();
+cartWidget.destroy();
 ```
 
 ## Listener
