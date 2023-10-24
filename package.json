@@ -8,6 +8,7 @@
     "watch-module": "tsc --build --clean . && tsc --build --watch .",
     "watch-webpack": "webpack --watch --mode=development",
     "build": "tsc --build --clean . && tsc --build . && webpack --mode=production",
+    "lint": "tsc --noEmit",
     "cs": "prettier --check .",
     "format": "prettier --write ."
   },
