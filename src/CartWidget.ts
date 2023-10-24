@@ -1,4 +1,5 @@
 import TecsafeApi, {CustomerToken, ListenerRemover} from "./TecsafeApi";
+import {ClientToServerMessage} from "./IframeMessage";
 
 export default class CartWidget {
     private api: TecsafeApi;
@@ -53,10 +54,6 @@ export default class CartWidget {
         this.iframe.style.width = '100%';
         this.iframe.style.height = '100%';
 
-        window.addEventListener('message', (event: MessageEvent<Message>) => {
-            this.listenMessage(event.data);
-        });
-
         this.element.appendChild(this.iframe);
     }
 
@@ -73,23 +70,7 @@ export default class CartWidget {
         this.element.appendChild(button);
     }
 
-    private message(message: Message) {
+    private message(message: ClientToServerMessage) {
         this.iframe?.contentWindow?.postMessage(message);
     }
-
-    private listenMessage(message: Message) {
-        switch (message.type) {
-            case 'changeCustomerToken':
-                this.updateCustomerToken(message.customerToken);
-                break;
-        }
-    }
-}
-
-
-export type Message = ChangeCustomerToken;
-
-type ChangeCustomerToken = {
-    type: 'changeCustomerToken';
-    customerToken: CustomerToken;
 }

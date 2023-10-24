@@ -15,10 +15,20 @@ const api = await TecsafeSdk.initializeTecsafeApi(async () => {
 });
 ```
 
+#### Error Handling
+
+
+
 ### Get the current user
 
 ```js
 api.reloadToken();
+```
+
+### Logout
+
+```js
+api.logout();
 ```
 
 ## Product Detail Usage

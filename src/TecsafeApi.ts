@@ -3,6 +3,7 @@ import {TypedEmitter} from "tiny-typed-emitter";
 import ProductDetailWidget from "./ProductDetailWidget";
 import CartWidget from "./CartWidget";
 import {GetCustomerTokenCallback} from "./index";
+import {ServerToClientMessage} from "./IframeMessage";
 
 export type EAN = "string";
 export type ItemId = "string";
@@ -22,7 +23,7 @@ export default class TecsafeApi {
         this.getCustomerTokenCallback = getCustomerTokenCallback;
         this.httpClient = new HttpClient(() => this.getCustomerToken());
 
-        window.addEventListener('message', (event: MessageEvent<Message>) => {
+        window.addEventListener('message', (event: MessageEvent<ServerToClientMessage>) => {
             this.listenMessage(event.data);
         });
     }
@@ -92,7 +93,7 @@ export default class TecsafeApi {
         this.eventEmitter.emit(event, ...args);
     }
 
-    private listenMessage(message: Message) {
+    private listenMessage(message: ServerToClientMessage) {
         switch (message.type) {
             case "addToCart":
                 this.eventEmitter.emit('addToCart', message.itemId, message.quantity, message.price);
@@ -126,29 +127,6 @@ export interface Cart {
 
 export interface CartItem {
     id: ItemId;
-    quantity: number;
-    price: number;
-}
-
-// Messages
-
-type Message = AddToCartMessage|RemoveFromCartMessage|ChangeCartQuantityMessage;
-
-type AddToCartMessage = {
-    type: 'addToCart';
-    itemId: ItemId;
-    quantity: number;
-    price: number;
-}
-
-type RemoveFromCartMessage = {
-    type: 'removeFromCart';
-    itemId: ItemId;
-}
-
-type ChangeCartQuantityMessage = {
-    type: 'changeCartQuantity';
-    itemId: ItemId;
     quantity: number;
     price: number;
 }
