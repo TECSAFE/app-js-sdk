@@ -1,4 +1,4 @@
-import {CustomerToken, ItemId} from "./CommonTypes";
+import {CustomerToken, ItemId, Price} from "./CommonTypes";
 
 export type ServerToClientMessage = AddToCartMessage|RemoveFromCartMessage|ChangeCartQuantityMessage;
 
@@ -6,7 +6,7 @@ type AddToCartMessage = {
     type: 'addToCart';
     itemId: ItemId;
     quantity: number;
-    price: number;
+    price: Price;
 }
 
 type RemoveFromCartMessage = {
@@ -18,7 +18,7 @@ type ChangeCartQuantityMessage = {
     type: 'changeCartQuantity';
     itemId: ItemId;
     quantity: number;
-    price: number;
+    price: Price;
 };
 
 export type ClientToServerMessage = ChangeCustomerToken;

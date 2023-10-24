@@ -4,7 +4,7 @@ import ProductDetailWidget from "./ProductDetailWidget";
 import CartWidget from "./CartWidget";
 import {GetCustomerTokenCallback} from "./index";
 import {ServerToClientMessage} from "./IframeMessage";
-import {ContainerId, CustomerToken, EAN, ItemId} from "./CommonTypes";
+import {ContainerId, CustomerToken, EAN, ItemId, Price} from "./CommonTypes";
 
 export default class TecsafeApi {
     private httpClient: HttpClient;
@@ -107,9 +107,9 @@ export default class TecsafeApi {
 export interface Listener {
     customerTokenChanged: (customerToken: CustomerToken|null) => void;
     bannerClicked: () => void;
-    addToCart: (itemId: ItemId, quantity: number, price: number) => void;
+    addToCart: (itemId: ItemId, quantity: number, price: Price) => void;
     removeFromCart: (itemId: ItemId) => void;
-    changeCartQuantity: (itemId: ItemId, quantity: number, price: number) => void;
+    changeCartQuantity: (itemId: ItemId, quantity: number, price: Price) => void;
 }
 
 export interface ListenerRemover {
@@ -118,11 +118,11 @@ export interface ListenerRemover {
 
 export interface Cart {
     articles: CartItem[];
-    sum: number;
+    sum: Price;
 }
 
 export interface CartItem {
     id: ItemId;
     quantity: number;
-    price: number;
+    price: Price;
 }
