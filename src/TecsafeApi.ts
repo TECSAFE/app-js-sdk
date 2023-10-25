@@ -13,7 +13,7 @@ export default class TecsafeApi {
   private customerToken: CustomerToken | null = null;
   private eventEmitter: TypedEmitter<Listener> = new TypedEmitter<Listener>();
 
-  public readonly APP_URL = "https://tecsafe.github.io/app-ui";
+  public readonly APP_URL = "https://tecsafe.github.io/app-ui/pr-preview/pr-3/";
 
   constructor(getCustomerTokenCallback: GetCustomerTokenCallback) {
     this.getCustomerTokenCallback = getCustomerTokenCallback;

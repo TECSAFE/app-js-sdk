@@ -44,9 +44,11 @@ export default class ProductDetailWidget {
   private buildIframe() {
     this.element.innerHTML = ""; // remove all children
     this.iframe = document.createElement("iframe");
-    this.iframe.src = `${this.api.APP_URL}/iframe/?customerToken=${this.customerToken}`;
+    this.iframe.src = `${this.api.APP_URL}/iframe/widget?customerToken=${this.customerToken}`;
     this.iframe.style.width = "100%";
     this.iframe.style.height = "100%";
+    this.iframe.style.backgroundColor = "transparent";
+    this.iframe.style.border = "none";
 
     this.element.appendChild(this.iframe);
   }

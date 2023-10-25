@@ -8,9 +8,17 @@
     />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>TECSAFE Demo</title>
+    <style>
+      body {
+        background: darkcyan;
+      }
+    </style>
   </head>
   <body>
-    <div id="widget"></div>
+    <h1>Product</h1>
+    <div id="product-widget"></div>
+    <h1>Cart</h1>
+    <div id="cart-widget"></div>
 
     <button id="token">Token</button>
     <button id="destroy">Destroy</button>
@@ -24,14 +32,16 @@
       return Math.random().toString(36).slice(2, 7);
     });
 
-    const widgetWrapper = document.getElementById("widget");
+    const cartWidgetWrapper = document.getElementById("cart-widget");
+    const productWidgetWrapper = document.getElementById("product-widget");
     const tokenButton = document.getElementById("token");
     const destroyButton = document.getElementById("destroy");
 
-    const widget = api.cartWidget(widgetWrapper);
+    const cartWidget = api.cartWidget(cartWidgetWrapper);
+    const productWidget = api.productDetailWidget(productWidgetWrapper);
 
     destroyButton.addEventListener("click", () => {
-      widget.destroy();
+      cartWidget.destroy();
     });
 
     tokenButton.addEventListener("click", () => {

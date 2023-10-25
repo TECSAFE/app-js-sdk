@@ -54,9 +54,11 @@ export default class CartWidget {
   private buildIframe(): void {
     this.element.innerHTML = ""; // remove all children
     this.iframe = document.createElement("iframe");
-    this.iframe.src = `${this.api.APP_URL}/iframe`;
+    this.iframe.src = `${this.api.APP_URL}/iframe/cart`;
     this.iframe.style.width = "100%";
     this.iframe.style.height = "100%";
+    this.iframe.style.backgroundColor = "transparent";
+    this.iframe.style.border = "none";
 
     this.element.appendChild(this.iframe);
   }
