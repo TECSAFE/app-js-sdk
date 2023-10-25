@@ -15,8 +15,6 @@ const api = await TecsafeSdk.initializeTecsafeApi(async () => {
 });
 ```
 
-#### Error Handling
-
 ### Get the current user
 
 ```js

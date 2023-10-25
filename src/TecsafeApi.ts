@@ -15,6 +15,7 @@ export default class TecsafeApi {
   private eventEmitter: TypedEmitter<Listener> = new TypedEmitter<Listener>();
   private appWidget: AppWidget | null = null;
   private refreshTimeout: NodeJS.Timeout | null = null;
+  private retryCounter: number = 0;
 
   public readonly APP_URL = "https://tecsafe.github.io/app-ui/pr-preview/pr-3/";
 
@@ -106,6 +107,7 @@ export default class TecsafeApi {
 
         if (previousDecodedToken.sub === decodedToken.sub) {
           this.customerToken = token;
+          this.retryCounter = 0;
           this.eventEmitter.emit("refreshToken", token);
 
           return;
@@ -113,11 +115,27 @@ export default class TecsafeApi {
       }
 
       this.customerToken = token;
+      this.retryCounter = 0;
       this.eventEmitter.emit("customerChanged", token);
     } catch (e) {
-      this.logout();
+      console.error(e);
 
-      throw e;
+      if (this.refreshTimeout) {
+        clearTimeout(this.refreshTimeout);
+        this.refreshTimeout = null;
+      }
+
+      if (this.retryCounter < 3) {
+        console.warn(`retry in 5 seconds (${this.retryCounter + 1}/3)`);
+        this.retryCounter++;
+        this.refreshTimeout = setTimeout(() => {
+          this.reloadToken();
+        }, 5000);
+
+        return;
+      }
+
+      this.logout();
     }
   }
 
