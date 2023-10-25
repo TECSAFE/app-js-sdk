@@ -16,14 +16,13 @@
   "license": "MIT",
   "devDependencies": {
     "prettier": "^3.0.3",
-    "tiny-typed-emitter": "^2.1.0",
     "ts-loader": "^9.5.0",
     "typescript": "^5.2.2",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2",
-    "jwt-decode": "^3.1.2"
+    "jwt-decode": "^3.1.2",
+    "tiny-typed-emitter": "^2.1.0"
   }
 }
