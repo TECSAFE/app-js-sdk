@@ -20,22 +20,41 @@
     <h1>Cart</h1>
     <div id="cart-widget"></div>
 
+    <select id="api-return">
+      <option selected value="valid">Valid</option>
+      <option value="invalid">Invalid</option>
+      <option value="error">Error</option>
+    </select>
     <button id="token">Token</button>
     <button id="destroy">Destroy</button>
+    <button id="open">Open App</button>
 
     <script src="../dist/bundle.js"></script>
   </body>
   <script type="module">
+    const apiReturnElement = document.getElementById("api-return");
+
+    console.log(apiReturnElement.value);
+
     const api = await TecsafeSdk.initializeTecsafeApi(async () => {
-      // async own shop backend get token
-      console.log("get token");
-      return Math.random().toString(36).slice(2, 7);
+      if (apiReturnElement.value === "valid") {
+        return Math.random().toString(36).slice(2, 7);
+      }
+
+      if (apiReturnElement.value === "invalid") {
+        return null;
+      }
+
+      if (apiReturnElement.value === "error") {
+        throw Error("error");
+      }
     });
 
     const cartWidgetWrapper = document.getElementById("cart-widget");
     const productWidgetWrapper = document.getElementById("product-widget");
     const tokenButton = document.getElementById("token");
     const destroyButton = document.getElementById("destroy");
+    const openAppButton = document.getElementById("open");
 
     const cartWidget = api.cartWidget(cartWidgetWrapper);
     const productWidget = api.productDetailWidget(productWidgetWrapper);
@@ -46,6 +65,10 @@
 
     tokenButton.addEventListener("click", () => {
       api.reloadToken();
+    });
+
+    openAppButton.addEventListener("click", () => {
+      api.openApp();
     });
   </script>
 </html>

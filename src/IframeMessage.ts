@@ -3,7 +3,9 @@ import { CustomerToken, ItemId, Price } from "./CommonTypes";
 export type ServerToClientMessage =
   | AddToCartMessage
   | RemoveFromCartMessage
-  | ChangeCartQuantityMessage;
+  | ChangeCartQuantityMessage
+  | OpenAppMessage
+  | CloseAppMessage;
 
 type AddToCartMessage = {
   type: "addToCart";
@@ -22,6 +24,14 @@ type ChangeCartQuantityMessage = {
   itemId: ItemId;
   quantity: number;
   price: Price;
+};
+
+type OpenAppMessage = {
+  type: "openApp";
+};
+
+type CloseAppMessage = {
+  type: "closeApp";
 };
 
 export type ClientToServerMessage = ChangeCustomerToken;

@@ -2,16 +2,17 @@ import HttpClient from "./HttpClient";
 import { TypedEmitter } from "tiny-typed-emitter";
 import ProductDetailWidget from "./ProductDetailWidget";
 import CartWidget from "./CartWidget";
+import AppWidget from "./AppWidget";
 import { GetCustomerTokenCallback } from "./index";
 import { ServerToClientMessage } from "./IframeMessage";
 import { ContainerId, CustomerToken, EAN, ItemId, Price } from "./CommonTypes";
 
 export default class TecsafeApi {
   private httpClient: HttpClient;
-  private sessionStorageKey: string = "tecsafe-customer-token";
   private getCustomerTokenCallback: GetCustomerTokenCallback;
   private customerToken: CustomerToken | null = null;
   private eventEmitter: TypedEmitter<Listener> = new TypedEmitter<Listener>();
+  private appWidget: AppWidget | null = null;
 
   public readonly APP_URL = "https://tecsafe.github.io/app-ui/pr-preview/pr-3/";
 
@@ -41,6 +42,25 @@ export default class TecsafeApi {
 
   cartWidget(element: HTMLElement): CartWidget {
     return new CartWidget(this, element);
+  }
+
+  openApp(): AppWidget {
+    if (this.appWidget) {
+      return this.appWidget;
+    }
+
+    this.appWidget = new AppWidget(this);
+
+    return this.appWidget;
+  }
+
+  closeApp(): void {
+    if (!this.appWidget) {
+      return;
+    }
+
+    this.appWidget.destroy();
+    this.appWidget = null;
   }
 
   async reloadToken(): Promise<void> {
@@ -115,6 +135,12 @@ export default class TecsafeApi {
           message.quantity,
           message.price,
         );
+        break;
+      case "openApp":
+        this.openApp();
+        break;
+      case "closeApp":
+        this.closeApp();
         break;
     }
   }

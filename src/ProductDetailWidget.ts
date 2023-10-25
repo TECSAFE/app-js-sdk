@@ -1,4 +1,4 @@
-import TecsafeApi from "./TecsafeApi";
+import TecsafeApi, { ListenerRemover } from "./TecsafeApi";
 import { ContainerId, CustomerToken, EAN } from "./CommonTypes";
 
 export default class ProductDetailWidget {
@@ -8,6 +8,8 @@ export default class ProductDetailWidget {
   private iframe: HTMLIFrameElement | null = null;
   private insertArticles: EAN[];
   private containerId: ContainerId;
+
+  private customerTokenChangedListenerRemover: ListenerRemover;
 
   constructor(
     api: TecsafeApi,
@@ -20,13 +22,18 @@ export default class ProductDetailWidget {
     this.insertArticles = insertArticles;
     this.containerId = containerId;
 
-    this.api.on("customerTokenChanged", this.updateCustomerToken);
+    this.customerTokenChangedListenerRemover = this.api.on(
+      "customerTokenChanged",
+      (customerToken) => {
+        this.updateCustomerToken(customerToken);
+      },
+    );
 
     this.updateCustomerToken(this.api.getCustomerToken());
   }
 
   destroy() {
-    this.api.off("customerTokenChanged", this.updateCustomerToken);
+    this.customerTokenChangedListenerRemover();
     this.iframe = null;
     this.element.innerHTML = "destroyed!";
   }
@@ -54,13 +61,7 @@ export default class ProductDetailWidget {
   }
 
   private buildBanner() {
-    this.element.innerHTML = ""; // remove all children
+    this.element.innerHTML = "Invalid Token";
     this.iframe = null;
-    const button = document.createElement("button");
-
-    button.innerText = "Activate";
-    button.onclick = () => {};
-
-    this.element.appendChild(button);
   }
 }
