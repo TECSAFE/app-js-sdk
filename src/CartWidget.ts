@@ -4,7 +4,6 @@ import { CustomerToken } from "./CommonTypes";
 
 export default class CartWidget {
   private api: TecsafeApi;
-  private customerToken: CustomerToken | null = null;
   private element: HTMLElement;
   private iframe: HTMLIFrameElement | null = null;
 
@@ -16,12 +15,12 @@ export default class CartWidget {
 
     this.customerTokenChangedListenerRemover = this.api.on(
       "customerTokenChanged",
-      (customerToken) => {
-        this.updateCustomerToken(customerToken);
+      () => {
+        this.update();
       },
     );
 
-    this.updateCustomerToken(this.api.getCustomerToken());
+    this.update();
   }
 
   destroy() {
@@ -30,24 +29,20 @@ export default class CartWidget {
     this.element.innerHTML = "";
   }
 
-  updateCustomerToken(customerToken: CustomerToken | null) {
-    if (this.customerToken === customerToken) {
-      return;
-    }
+  update() {
+    const customerToken = this.api.getCustomerToken();
 
-    this.customerToken = customerToken;
-
-    if (this.customerToken) {
-      this.buildIframe();
+    if (customerToken) {
+      this.buildIframe(customerToken);
     } else {
       this.buildBanner();
     }
   }
 
-  private buildIframe(): void {
+  private buildIframe(customerToken: CustomerToken): void {
     this.element.innerHTML = ""; // remove all children
     this.iframe = document.createElement("iframe");
-    this.iframe.src = `${this.api.APP_URL}/iframe/cart?customerToken=${this.customerToken}`;
+    this.iframe.src = `${this.api.APP_URL}/iframe/cart?customerToken=${customerToken}`;
     this.iframe.style.width = "100%";
     this.iframe.style.height = "100%";
     this.iframe.style.backgroundColor = "transparent";

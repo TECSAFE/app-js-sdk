@@ -18,7 +18,13 @@ export default class TecsafeApi {
 
   constructor(getCustomerTokenCallback: GetCustomerTokenCallback) {
     this.getCustomerTokenCallback = getCustomerTokenCallback;
-    this.httpClient = new HttpClient(() => this.getCustomerToken());
+    this.httpClient = new HttpClient(() => {
+      if (this.customerToken === null) {
+        throw new Error("missing customer token");
+      }
+
+      return this.customerToken;
+    });
 
     window.addEventListener(
       "message",
@@ -65,28 +71,28 @@ export default class TecsafeApi {
 
   async reloadToken(): Promise<void> {
     try {
-      this.customerToken = await this.getCustomerTokenCallback();
-      this.eventEmitter.emit("customerTokenChanged", this.customerToken);
+      this.updateCustomerToken(await this.getCustomerTokenCallback());
     } catch (e) {
-      this.customerToken = null;
-      this.eventEmitter.emit("customerTokenChanged", null);
+      this.updateCustomerToken(null);
       throw e;
     }
   }
 
-  logout() {
-    this.customerToken = null;
-    this.eventEmitter.emit("customerTokenChanged", null);
-  }
-
-  getCustomerToken(): CustomerToken {
-    const customerToken = this.customerToken;
-
-    if (!customerToken) {
-      throw new Error("missing customer token");
+  private updateCustomerToken(customerToken: CustomerToken | null) {
+    if (this.customerToken === customerToken) {
+      return;
     }
 
-    return customerToken;
+    this.customerToken = customerToken;
+    this.eventEmitter.emit("customerTokenChanged", customerToken);
+  }
+
+  logout() {
+    this.updateCustomerToken(null);
+  }
+
+  getCustomerToken(): CustomerToken | null {
+    return this.customerToken;
   }
 
   async getCart(): Promise<Cart> {

@@ -4,7 +4,6 @@ import { CustomerToken } from "./CommonTypes";
 
 export default class AppWidget {
   private api: TecsafeApi;
-  private customerToken: CustomerToken | null = null;
   private element: HTMLElement | null = null;
   private iframe: HTMLIFrameElement | null = null;
 
@@ -16,11 +15,11 @@ export default class AppWidget {
     this.customerTokenChangedListenerRemover = this.api.on(
       "customerTokenChanged",
       (customerToken) => {
-        this.updateCustomerToken(customerToken);
+        this.update();
       },
     );
 
-    this.updateCustomerToken(this.api.getCustomerToken());
+    this.update();
   }
 
   destroy() {
@@ -32,21 +31,17 @@ export default class AppWidget {
     }
   }
 
-  updateCustomerToken(customerToken: CustomerToken | null) {
-    if (this.customerToken === customerToken) {
-      return;
-    }
+  update() {
+    const customerToken = this.api.getCustomerToken();
 
-    this.customerToken = customerToken;
-
-    if (this.customerToken) {
-      this.buildIframe();
+    if (customerToken) {
+      this.buildIframe(customerToken);
     } else {
       this.destroy();
     }
   }
 
-  private buildIframe(): void {
+  private buildIframe(customerToken: CustomerToken): void {
     this.element = document.createElement("div");
     this.element.style.position = "fixed";
     this.element.style.backdropFilter = "blur(10px)";
@@ -58,7 +53,9 @@ export default class AppWidget {
     this.element.style.boxSizing = "border-box";
 
     this.iframe = document.createElement("iframe");
-    this.iframe.src = `${this.api.APP_URL}/iframe/app?customerToken=${this.customerToken}`;
+    this.iframe.src = `${
+      this.api.APP_URL
+    }/iframe/app?customerToken=${this.api.getCustomerToken()}`;
     this.iframe.style.height = "100%";
     this.iframe.style.width = "100%";
     this.iframe.style.backgroundColor = "transparent";
