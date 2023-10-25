@@ -10,7 +10,24 @@
     <title>TECSAFE Demo</title>
     <style>
       body {
-        background: darkcyan;
+        background: #0b7285;
+        color: #ffffff;
+      }
+
+      button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        background: #1098ad;
+        color: #ffffff;
+      }
+
+      select {
+        padding: 10px 20px;
+        border-radius: 5px;
+        border: none;
+        background: #1098ad;
+        color: #ffffff;
       }
     </style>
   </head>
@@ -19,6 +36,9 @@
     <div id="product-widget"></div>
     <h1>Cart</h1>
     <div id="cart-widget"></div>
+    <button id="destroy">Destroy</button>
+
+    <h1>Global</h1>
 
     <select id="api-return">
       <option selected value="valid">Valid</option>
@@ -26,7 +46,6 @@
       <option value="error">Error</option>
     </select>
     <button id="token">Token</button>
-    <button id="destroy">Destroy</button>
     <button id="open">Open App</button>
 
     <script src="../dist/bundle.js"></script>
