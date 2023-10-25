@@ -16,7 +16,7 @@ export default class AppWidget extends StandaloneWidget {
     this.iframe = document.createElement("iframe");
     this.iframe.src = `${
       this.api.APP_URL
-    }/iframe/app?customerToken=${this.api.getCustomerToken()}`;
+    }/iframe/app?customerToken=${customerToken}`;
     this.iframe.style.height = "100%";
     this.iframe.style.width = "100%";
     this.iframe.style.backgroundColor = "transparent";
