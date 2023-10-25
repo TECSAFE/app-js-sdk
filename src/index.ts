@@ -2,7 +2,7 @@ import TecsafeApi from "./TecsafeApi";
 import { CustomerToken } from "./CommonTypes";
 
 export interface GetCustomerTokenCallback {
-  (): Promise<CustomerToken>;
+  (): Promise<CustomerToken | null>;
 }
 
 export async function initializeTecsafeApi(

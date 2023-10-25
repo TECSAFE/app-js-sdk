@@ -34,4 +34,9 @@ type CloseAppMessage = {
   type: "closeApp";
 };
 
-export type ClientToServerMessage = {};
+export type ClientToServerMessage = RefreshCustomerTokenMessage;
+
+type RefreshCustomerTokenMessage = {
+  type: "refreshCustomerToken";
+  customerToken: string;
+};

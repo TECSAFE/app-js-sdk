@@ -6,6 +6,7 @@ import AppWidget from "./AppWidget";
 import { GetCustomerTokenCallback } from "./index";
 import { ServerToClientMessage } from "./IframeMessage";
 import { ContainerId, CustomerToken, EAN, ItemId, Price } from "./CommonTypes";
+import jwt_decode from "jwt-decode";
 
 export default class TecsafeApi {
   private httpClient: HttpClient;
@@ -13,6 +14,7 @@ export default class TecsafeApi {
   private customerToken: CustomerToken | null = null;
   private eventEmitter: TypedEmitter<Listener> = new TypedEmitter<Listener>();
   private appWidget: AppWidget | null = null;
+  private refreshTimeout: NodeJS.Timeout | null = null;
 
   public readonly APP_URL = "https://tecsafe.github.io/app-ui/pr-preview/pr-3/";
 
@@ -71,24 +73,62 @@ export default class TecsafeApi {
 
   async reloadToken(): Promise<void> {
     try {
-      this.updateCustomerToken(await this.getCustomerTokenCallback());
+      const token = await this.getCustomerTokenCallback();
+
+      if (token === this.customerToken) {
+        return;
+      }
+
+      if (token === null) {
+        this.logout();
+
+        return;
+      }
+
+      const decodedToken = jwt_decode<DecodedToken>(token);
+
+      if (this.refreshTimeout) {
+        clearTimeout(this.refreshTimeout);
+        this.refreshTimeout = null;
+      }
+
+      this.refreshTimeout = setTimeout(
+        () => {
+          this.reloadToken();
+        },
+        (decodedToken.exp - 30) * 1000 - Date.now(),
+      );
+
+      if (this.customerToken) {
+        const previousDecodedToken = jwt_decode<DecodedToken>(
+          this.customerToken,
+        );
+
+        if (previousDecodedToken.sub === decodedToken.sub) {
+          this.customerToken = token;
+          this.eventEmitter.emit("refreshToken", token);
+
+          return;
+        }
+      }
+
+      this.customerToken = token;
+      this.eventEmitter.emit("customerChanged", token);
     } catch (e) {
-      this.updateCustomerToken(null);
+      this.logout();
+
       throw e;
     }
   }
 
-  private updateCustomerToken(customerToken: CustomerToken | null) {
-    if (this.customerToken === customerToken) {
-      return;
+  logout() {
+    if (this.refreshTimeout) {
+      clearTimeout(this.refreshTimeout);
+      this.refreshTimeout = null;
     }
 
-    this.customerToken = customerToken;
-    this.eventEmitter.emit("customerTokenChanged", customerToken);
-  }
-
-  logout() {
-    this.updateCustomerToken(null);
+    this.customerToken = null;
+    this.eventEmitter.emit("customerLogout");
   }
 
   getCustomerToken(): CustomerToken | null {
@@ -153,7 +193,9 @@ export default class TecsafeApi {
 }
 
 export interface Listener {
-  customerTokenChanged: (customerToken: CustomerToken | null) => void;
+  customerChanged: (customerToken: CustomerToken) => void;
+  customerLogout: () => void;
+  refreshToken: (customerToken: CustomerToken) => void;
   bannerClicked: () => void;
   addToCart: (itemId: ItemId, quantity: number, price: Price) => void;
   removeFromCart: (itemId: ItemId) => void;
@@ -174,3 +216,8 @@ export interface CartItem {
   quantity: number;
   price: Price;
 }
+
+type DecodedToken = {
+  sub: string;
+  exp: number;
+};

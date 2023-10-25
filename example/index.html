@@ -41,23 +41,31 @@
     <h1>Global</h1>
 
     <select id="api-return">
-      <option selected value="valid">Valid</option>
-      <option value="invalid">Invalid</option>
+      <option selected value="change">Change User</option>
+      <option selected value="refresh">Refresh Token</option>
+      <option value="invalid">Null Token</option>
       <option value="error">Error</option>
     </select>
-    <button id="token">Token</button>
+    <button id="token">Force Reload Token</button>
     <button id="open">Open App</button>
 
     <script src="../dist/bundle.js"></script>
   </body>
   <script type="module">
     const apiReturnElement = document.getElementById("api-return");
+    let user = 1;
 
     console.log(apiReturnElement.value);
 
     const api = await TecsafeSdk.initializeTecsafeApi(async () => {
-      if (apiReturnElement.value === "valid") {
-        return Math.random().toString(36).slice(2, 7);
+      console.log("reload token");
+
+      if (apiReturnElement.value === "change") {
+        return dummyJwtToken(++user);
+      }
+
+      if (apiReturnElement.value === "refresh") {
+        return dummyJwtToken(user);
       }
 
       if (apiReturnElement.value === "invalid") {
@@ -89,5 +97,16 @@
     openAppButton.addEventListener("click", () => {
       api.openApp();
     });
+
+    function dummyJwtToken(userId) {
+      const payload = {
+        sub: userId,
+        exp: new Date().getTime() / 1000 + 60,
+      };
+
+      return `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(
+        JSON.stringify(payload),
+      )}.signature`;
+    }
   </script>
 </html>

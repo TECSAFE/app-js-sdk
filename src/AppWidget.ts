@@ -1,47 +1,8 @@
-import TecsafeApi, { ListenerRemover } from "./TecsafeApi";
-import { ClientToServerMessage } from "./IframeMessage";
 import { CustomerToken } from "./CommonTypes";
+import StandaloneWidget from "./StandaloneWidget";
 
-export default class AppWidget {
-  private api: TecsafeApi;
-  private element: HTMLElement | null = null;
-  private iframe: HTMLIFrameElement | null = null;
-
-  private customerTokenChangedListenerRemover: ListenerRemover;
-
-  constructor(api: TecsafeApi) {
-    this.api = api;
-
-    this.customerTokenChangedListenerRemover = this.api.on(
-      "customerTokenChanged",
-      (customerToken) => {
-        this.update();
-      },
-    );
-
-    this.update();
-  }
-
-  destroy() {
-    this.customerTokenChangedListenerRemover();
-    this.iframe = null;
-    if (this.element) {
-      this.element.remove();
-      this.element = null;
-    }
-  }
-
-  update() {
-    const customerToken = this.api.getCustomerToken();
-
-    if (customerToken) {
-      this.buildIframe(customerToken);
-    } else {
-      this.destroy();
-    }
-  }
-
-  private buildIframe(customerToken: CustomerToken): void {
+export default class AppWidget extends StandaloneWidget {
+  protected build(customerToken: CustomerToken): void {
     this.element = document.createElement("div");
     this.element.style.position = "fixed";
     this.element.style.backdropFilter = "blur(10px)";
@@ -63,9 +24,5 @@ export default class AppWidget {
 
     this.element.appendChild(this.iframe);
     document.body.append(this.element);
-  }
-
-  private message(message: ClientToServerMessage) {
-    this.iframe?.contentWindow?.postMessage(message);
   }
 }
