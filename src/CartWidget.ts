@@ -35,26 +35,19 @@ export default class CartWidget {
       return;
     }
 
-    if (this.customerToken === null && customerToken !== null) {
-      this.customerToken = customerToken;
-      this.buildIframe();
-    } else if (this.customerToken !== null && customerToken === null) {
-      this.customerToken = null;
-      this.buildBanner();
-    }
+    this.customerToken = customerToken;
 
-    if (customerToken) {
-      this.message({
-        type: "changeCustomerToken",
-        customerToken: customerToken,
-      });
+    if (this.customerToken) {
+      this.buildIframe();
+    } else {
+      this.buildBanner();
     }
   }
 
   private buildIframe(): void {
     this.element.innerHTML = ""; // remove all children
     this.iframe = document.createElement("iframe");
-    this.iframe.src = `${this.api.APP_URL}/iframe/cart`;
+    this.iframe.src = `${this.api.APP_URL}/iframe/cart?customerToken=${this.customerToken}`;
     this.iframe.style.width = "100%";
     this.iframe.style.height = "100%";
     this.iframe.style.backgroundColor = "transparent";

@@ -1,4 +1,4 @@
-import { CustomerToken, ItemId, Price } from "./CommonTypes";
+import { ItemId, Price } from "./CommonTypes";
 
 export type ServerToClientMessage =
   | AddToCartMessage
@@ -34,9 +34,4 @@ type CloseAppMessage = {
   type: "closeApp";
 };
 
-export type ClientToServerMessage = ChangeCustomerToken;
-
-type ChangeCustomerToken = {
-  type: "changeCustomerToken";
-  customerToken: CustomerToken;
-};
+export type ClientToServerMessage = {};

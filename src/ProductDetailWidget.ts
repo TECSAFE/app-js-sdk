@@ -39,9 +39,13 @@ export default class ProductDetailWidget {
   }
 
   updateCustomerToken(customerToken: CustomerToken | null) {
+    if (this.customerToken === customerToken) {
+      return;
+    }
+
     this.customerToken = customerToken;
 
-    if (customerToken) {
+    if (this.customerToken) {
       this.buildIframe();
     } else {
       this.buildBanner();
