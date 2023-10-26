@@ -57,25 +57,30 @@
 
     console.log(apiReturnElement.value);
 
-    const api = await TecsafeSdk.initializeTecsafeApi(async () => {
-      console.log("reload token");
+    const api = await TecsafeSdk.initializeTecsafeApi(
+      async () => {
+        console.log("reload token");
 
-      if (apiReturnElement.value === "change") {
-        return dummyJwtToken(++user);
-      }
+        if (apiReturnElement.value === "change") {
+          return dummyJwtToken(++user);
+        }
 
-      if (apiReturnElement.value === "refresh") {
-        return dummyJwtToken(user);
-      }
+        if (apiReturnElement.value === "refresh") {
+          return dummyJwtToken(user);
+        }
 
-      if (apiReturnElement.value === "invalid") {
-        return null;
-      }
+        if (apiReturnElement.value === "invalid") {
+          return null;
+        }
 
-      if (apiReturnElement.value === "error") {
-        throw Error("error");
-      }
-    });
+        if (apiReturnElement.value === "error") {
+          throw Error("error");
+        }
+      },
+      {
+        appUrl: "https://tecsafe.github.io/app-ui/pr-preview/pr-3/",
+      },
+    );
 
     const cartWidgetWrapper = document.getElementById("cart-widget");
     const productWidgetWrapper = document.getElementById("product-widget");

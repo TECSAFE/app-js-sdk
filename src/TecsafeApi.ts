@@ -9,6 +9,7 @@ import { ContainerId, CustomerToken, EAN, ItemId, Price } from "./CommonTypes";
 import jwt_decode from "jwt-decode";
 
 export default class TecsafeApi {
+  public readonly config: Config;
   private httpClient: HttpClient;
   private getCustomerTokenCallback: GetCustomerTokenCallback;
   private customerToken: CustomerToken | null = null;
@@ -17,9 +18,15 @@ export default class TecsafeApi {
   private refreshTimeout: NodeJS.Timeout | null = null;
   private retryCounter: number = 0;
 
-  public readonly APP_URL = "https://tecsafe.github.io/app-ui/pr-preview/pr-3/";
+  constructor(
+    getCustomerTokenCallback: GetCustomerTokenCallback,
+    config: Config,
+  ) {
+    this.config = {
+      appUrl: "https://tecsafe.github.io/app-ui/",
+      ...config,
+    };
 
-  constructor(getCustomerTokenCallback: GetCustomerTokenCallback) {
     this.getCustomerTokenCallback = getCustomerTokenCallback;
     this.httpClient = new HttpClient(() => {
       if (this.customerToken === null) {
@@ -240,4 +247,8 @@ export interface CartItem {
 type DecodedToken = {
   sub: string;
   exp: number;
+};
+
+export type Config = {
+  readonly appUrl?: string;
 };
