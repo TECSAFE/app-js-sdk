@@ -4,7 +4,7 @@ import ProductDetailWidget from "./ProductDetailWidget";
 import CartWidget from "./CartWidget";
 import AppWidget from "./AppWidget";
 import { GetCustomerTokenCallback } from "./index";
-import { ServerToClientMessage } from "./IframeMessage";
+import { AppToSdkMessage } from "./IframeMessage";
 import { ContainerId, CustomerToken, EAN, ItemId, Price } from "./CommonTypes";
 import jwt_decode from "jwt-decode";
 
@@ -31,7 +31,7 @@ export default class TecsafeApi {
 
     window.addEventListener(
       "message",
-      (event: MessageEvent<ServerToClientMessage>) => {
+      (event: MessageEvent<AppToSdkMessage>) => {
         this.listenMessage(event.data);
       },
     );
@@ -92,6 +92,8 @@ export default class TecsafeApi {
         clearTimeout(this.refreshTimeout);
         this.refreshTimeout = null;
       }
+
+      // check expire date
 
       this.refreshTimeout = setTimeout(
         () => {
@@ -179,7 +181,7 @@ export default class TecsafeApi {
     this.eventEmitter.emit(event, ...args);
   }
 
-  private listenMessage(message: ServerToClientMessage) {
+  private listenMessage(message: AppToSdkMessage) {
     switch (message.type) {
       case "addToCart":
         this.eventEmitter.emit(

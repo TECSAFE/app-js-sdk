@@ -1,5 +1,5 @@
 import TecsafeApi, { ListenerRemover } from "./TecsafeApi";
-import { ClientToServerMessage } from "./IframeMessage";
+import { SdkToAppMessage } from "./IframeMessage";
 import { CustomerToken } from "./CommonTypes";
 
 export default abstract class StandaloneWidget {
@@ -56,7 +56,7 @@ export default abstract class StandaloneWidget {
 
   protected build(customerToken: CustomerToken): void {}
 
-  protected message(message: ClientToServerMessage) {
+  protected message(message: SdkToAppMessage) {
     this.iframe?.contentWindow?.postMessage(message);
   }
 }

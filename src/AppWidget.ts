@@ -14,9 +14,7 @@ export default class AppWidget extends StandaloneWidget {
     this.element.style.boxSizing = "border-box";
 
     this.iframe = document.createElement("iframe");
-    this.iframe.src = `${
-      this.api.APP_URL
-    }/iframe/app?customerToken=${customerToken}`;
+    this.iframe.src = `${this.api.APP_URL}/iframe/app?customerToken=${customerToken}`;
     this.iframe.style.height = "100%";
     this.iframe.style.width = "100%";
     this.iframe.style.backgroundColor = "transparent";

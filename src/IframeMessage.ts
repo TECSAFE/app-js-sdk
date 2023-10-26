@@ -1,6 +1,6 @@
 import { ItemId, Price } from "./CommonTypes";
 
-export type ServerToClientMessage =
+export type AppToSdkMessage =
   | AddToCartMessage
   | RemoveFromCartMessage
   | ChangeCartQuantityMessage
@@ -34,7 +34,7 @@ type CloseAppMessage = {
   type: "closeApp";
 };
 
-export type ClientToServerMessage = RefreshCustomerTokenMessage;
+export type SdkToAppMessage = RefreshCustomerTokenMessage;
 
 type RefreshCustomerTokenMessage = {
   type: "refreshCustomerToken";
