@@ -12,6 +12,8 @@ jobs:
           node-version: "18.x"
           registry-url: "https://registry.npmjs.org"
       - run: npm ci
+      - run: git config --global user.name "GitHub CD bot"
+      - run: git config --global user.email "ci@tecsafe.de"
       - run: npm version ${{ github.event.release.tag_name }}
       - run: npm run build
       - run: npm publish --access public
