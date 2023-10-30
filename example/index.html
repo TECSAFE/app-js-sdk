@@ -52,85 +52,83 @@
     <button id="open">Open App</button>
 
     <script src="../dist/bundle.js"></script>
+    <script type="module">
+      const apiReturnElement = document.getElementById("api-return");
+      let user = 1;
+
+      const api = await TecsafeSdk.initializeTecsafeApi(
+        async () => {
+          console.log("reload token");
+
+          if (apiReturnElement.value === "change") {
+            return dummyJwtToken(++user);
+          }
+
+          if (apiReturnElement.value === "refresh") {
+            return dummyJwtToken(user);
+          }
+
+          if (apiReturnElement.value === "invalid") {
+            return null;
+          }
+
+          if (apiReturnElement.value === "error") {
+            throw Error("error");
+          }
+        },
+        {
+          appUrl: "https://tecsafe.github.io/app-ui/pr-preview/pr-3/",
+        },
+      );
+
+      const cartWidgetWrapper = document.getElementById("cart-widget");
+      const productWidgetWrapper = document.getElementById("product-widget");
+      const tokenButton = document.getElementById("token");
+      const destroyButton = document.getElementById("destroy");
+      const openAppButton = document.getElementById("open");
+      const cartInfo = document.getElementById("cart-info");
+
+      const cartWidget = api.cartWidget(cartWidgetWrapper);
+      const productWidget = api.productDetailWidget(productWidgetWrapper);
+
+      api.on("addToCart", (itemId, quantity, price) => {
+        cartInfo.innerHTML = `Item "${itemId}" added to cart: ${quantity} x ${
+          price / 100
+        } €`;
+      });
+
+      api.on("removeFromCart", (itemId) => {
+        cartInfo.innerHTML = `Item "${itemId}" removed from cart`;
+      });
+
+      api.on("changeCartQuantity", (itemId, quantity, price) => {
+        cartInfo.innerHTML = `Item "${itemId}" quantity changed to ${quantity} x ${
+          price / 100
+        } €`;
+      });
+
+      destroyButton.addEventListener("click", () => {
+        cartWidget.destroy();
+      });
+
+      tokenButton.addEventListener("click", () => {
+        api.reloadToken();
+      });
+
+      openAppButton.addEventListener("click", () => {
+        api.openApp();
+      });
+
+      function dummyJwtToken(userId) {
+        const payload = {
+          sub: userId,
+          exp: new Date().getTime() / 1000 + 60,
+        };
+
+        return `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(
+          JSON.stringify(payload),
+        )}.signature`;
+      }
+    </script>
   </body>
-  <script type="module">
-    const apiReturnElement = document.getElementById("api-return");
-    let user = 1;
-
-    console.log(apiReturnElement.value);
-
-    const api = await TecsafeSdk.initializeTecsafeApi(
-      async () => {
-        console.log("reload token");
-
-        if (apiReturnElement.value === "change") {
-          return dummyJwtToken(++user);
-        }
-
-        if (apiReturnElement.value === "refresh") {
-          return dummyJwtToken(user);
-        }
-
-        if (apiReturnElement.value === "invalid") {
-          return null;
-        }
-
-        if (apiReturnElement.value === "error") {
-          throw Error("error");
-        }
-      },
-      {
-        appUrl: "https://tecsafe.github.io/app-ui/pr-preview/pr-3/",
-      },
-    );
-
-    const cartWidgetWrapper = document.getElementById("cart-widget");
-    const productWidgetWrapper = document.getElementById("product-widget");
-    const tokenButton = document.getElementById("token");
-    const destroyButton = document.getElementById("destroy");
-    const openAppButton = document.getElementById("open");
-    const cartInfo = document.getElementById("cart-info");
-
-    const cartWidget = api.cartWidget(cartWidgetWrapper);
-    const productWidget = api.productDetailWidget(productWidgetWrapper);
-
-    api.on("addToCart", (itemId, quantity, price) => {
-      cartInfo.innerHTML = `Item "${itemId}" added to cart: ${quantity} x ${
-        price / 100
-      } €`;
-    });
-
-    api.on("removeFromCart", (itemId) => {
-      cartInfo.innerHTML = `Item "${itemId}" removed from cart`;
-    });
-
-    api.on("changeCartQuantity", (itemId, quantity, price) => {
-      cartInfo.innerHTML = `Item "${itemId}" quantity changed to ${quantity} x ${
-        price / 100
-      } €`;
-    });
-
-    destroyButton.addEventListener("click", () => {
-      cartWidget.destroy();
-    });
-
-    tokenButton.addEventListener("click", () => {
-      api.reloadToken();
-    });
-
-    openAppButton.addEventListener("click", () => {
-      api.openApp();
-    });
-
-    function dummyJwtToken(userId) {
-      const payload = {
-        sub: userId,
-        exp: new Date().getTime() / 1000 + 60,
-      };
-
-      return `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.${btoa(
-        JSON.stringify(payload),
-      )}.signature`;
-    }
-  </script>
 </html>
