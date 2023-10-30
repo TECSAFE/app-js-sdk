@@ -1,6 +1,6 @@
 {
   "name": "@tecsafe/app-js-sdk",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "Provides a Plugin to integrate the TECSAFE App into a Shopware 6 Shop.",
   "main": "src/index.mts",
   "type": "module",
