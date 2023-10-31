@@ -2,7 +2,8 @@
   "name": "@tecsafe/app-js-sdk",
   "version": "0.0.0",
   "description": "Provides a Plugin to integrate the TECSAFE App into a Shopware 6 Shop.",
-  "main": "src/index.mts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "watch-module": "tsc --build --clean . && tsc --build --watch .",
