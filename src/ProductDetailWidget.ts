@@ -3,19 +3,19 @@ import { ContainerId, CustomerToken, EAN } from "./CommonTypes";
 import EmbeddedWidget from "./EmbeddedWidget";
 
 export default class ProductDetailWidget extends EmbeddedWidget {
-  private insertArticles: EAN[];
   private containerId: ContainerId;
+  private insertArticles: EAN[];
 
   constructor(
     api: TecsafeApi,
     element: HTMLElement,
-    insertArticles: EAN[],
     containerId: ContainerId,
+    insertArticles: EAN[] = [],
   ) {
     super(api, element);
 
-    this.insertArticles = insertArticles;
     this.containerId = containerId;
+    this.insertArticles = insertArticles;
   }
 
   protected build(customerToken: CustomerToken) {

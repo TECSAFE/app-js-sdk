@@ -15,7 +15,15 @@ const api = await TecsafeSdk.initializeTecsafeApi(async () => {
 });
 ```
 
-### Get the current user
+#### Return Values
+
+JWT Token as `string`: If the an user is logged in or an anonymous token is available. The Widget are enabled.
+
+`null`: If the user is not logged in and an anonymous token is not available. The Widget are disabled.
+
+`Error`: If the token could not be loaded. The Widget are disabled. Try to reload the token 5 seconds later and 3 times.
+
+### Reload Token
 
 ```js
 api.reloadToken();
@@ -33,7 +41,7 @@ api.logout();
 
 ```js
 const widgetWrapper = document.getElementById("product-detail-widget");
-const productWidget = api.productDetailWidget(widgetWrapper);
+const productWidget = api.productDetailWidget(widgetWrapper, []);
 ```
 
 ### destroy product detail widget

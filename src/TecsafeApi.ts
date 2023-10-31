@@ -50,10 +50,10 @@ export default class TecsafeApi {
 
   productDetailWidget(
     element: HTMLElement,
-    insertArticles: EAN[],
     containerId: ContainerId,
+    insertArticles: EAN[] = [],
   ): ProductDetailWidget {
-    return new ProductDetailWidget(this, element, insertArticles, containerId);
+    return new ProductDetailWidget(this, element, containerId, insertArticles);
   }
 
   cartWidget(element: HTMLElement): CartWidget {
@@ -95,18 +95,13 @@ export default class TecsafeApi {
 
       const decodedToken = jwt_decode<DecodedToken>(token);
 
-      if (this.refreshTimeout) {
-        clearTimeout(this.refreshTimeout);
-        this.refreshTimeout = null;
-      }
-
-      // check expire date
+      this.clearRefreshTimeout();
 
       this.refreshTimeout = setTimeout(
         () => {
           this.reloadToken();
         },
-        (decodedToken.exp - 30) * 1000 - Date.now(),
+        (decodedToken.exp - 30) * 1000 - Date.now(), // refresh 30 seconds before token expires
       );
 
       if (this.customerToken) {
@@ -115,6 +110,7 @@ export default class TecsafeApi {
         );
 
         if (previousDecodedToken.sub === decodedToken.sub) {
+          // same customer, just refresh token
           this.customerToken = token;
           this.retryCounter = 0;
           this.eventEmitter.emit("refreshToken", token);
@@ -123,23 +119,23 @@ export default class TecsafeApi {
         }
       }
 
+      // new customer
       this.customerToken = token;
       this.retryCounter = 0;
       this.eventEmitter.emit("customerChanged", token);
     } catch (e) {
       console.error(e);
 
-      if (this.refreshTimeout) {
-        clearTimeout(this.refreshTimeout);
-        this.refreshTimeout = null;
-      }
+      this.clearRefreshTimeout();
 
       if (this.retryCounter < 3) {
+        // retry 3 times
         console.warn(`retry in 5 seconds (${this.retryCounter + 1}/3)`);
         this.retryCounter++;
+
         this.refreshTimeout = setTimeout(() => {
           this.reloadToken();
-        }, 5000);
+        }, 5000); // retry in 5 seconds
 
         return;
       }
@@ -149,10 +145,7 @@ export default class TecsafeApi {
   }
 
   logout() {
-    if (this.refreshTimeout) {
-      clearTimeout(this.refreshTimeout);
-      this.refreshTimeout = null;
-    }
+    this.clearRefreshTimeout();
 
     this.customerToken = null;
     this.eventEmitter.emit("customerLogout");
@@ -215,6 +208,13 @@ export default class TecsafeApi {
       case "closeApp":
         this.closeApp();
         break;
+    }
+  }
+
+  private clearRefreshTimeout() {
+    if (this.refreshTimeout) {
+      clearTimeout(this.refreshTimeout);
+      this.refreshTimeout = null;
     }
   }
 }
