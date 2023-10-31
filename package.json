@@ -25,5 +25,13 @@
   "dependencies": {
     "jwt-decode": "^3.1.2",
     "tiny-typed-emitter": "^2.1.0"
+  },
+  "exports": {
+    "./*": "./dist/*"
+  },
+  "typesVersions": {
+    "*": {
+      "*": ["dist/*"]
+    }
   }
 }
