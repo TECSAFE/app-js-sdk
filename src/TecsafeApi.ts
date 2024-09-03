@@ -1,254 +1,138 @@
-import HttpClient from "./HttpClient";
-import { TypedEmitter } from "tiny-typed-emitter";
-import ProductDetailWidget from "./ProductDetailWidget";
-import CartWidget from "./CartWidget";
-import AppWidget from "./AppWidget";
-import { GetCustomerTokenCallback } from "./index";
-import { AppToSdkMessage } from "./IframeMessage";
-import { ContainerId, CustomerToken, EAN, ItemId, Price } from "./CommonTypes";
-import jwt_decode from "jwt-decode";
+import { BaseWidget } from "./types/BaseWidget";
+import { OfcpConfig } from "./types/Config";
+import { MessageType, SetTokenMessage } from "./types/Messages";
+import { AppWidget } from "./widget/AppWidget";
+import { parseCustomerJwt } from "@tecsafe/jwt-sdk";
+import { CartWidget } from "./widget/CartWidget";
+import { ProductDetailWidget } from "./widget/ProductDetailWidget";
 
-export default class TecsafeApi {
-  public readonly config: Config;
-  private httpClient: HttpClient;
-  private getCustomerTokenCallback: GetCustomerTokenCallback;
-  private customerToken: CustomerToken | null = null;
-  private eventEmitter: TypedEmitter<Listener> = new TypedEmitter<Listener>();
-  private appWidget: AppWidget | null = null;
-  private refreshTimeout: NodeJS.Timeout | null = null;
-  private retryCounter: number = 0;
-
+/**
+ * The main entry point for the OFCP App JS SDK
+ */
+export class TecsafeApi {
+  /**
+   * The main entry point for the OFCP App JS SDK
+   * This class should only be instantiated after the user has consented to the terms, conditions, and privacy policy!
+   * @param tokenFN A function that returns the customer token as a string inside a promise
+   * @param config Advanced configuration for the SDK, rarely needed
+   */
   constructor(
-    getCustomerTokenCallback: GetCustomerTokenCallback,
-    config: Config,
+    private readonly tokenFN: () => Promise<string>,
+    private readonly config: OfcpConfig = new OfcpConfig(),
   ) {
-    this.config = {
-      appUrl: "https://tecsafe.github.io/app-ui/",
-      ...config,
-    };
-
-    this.getCustomerTokenCallback = getCustomerTokenCallback;
-    this.httpClient = new HttpClient(() => {
-      if (this.customerToken === null) {
-        throw new Error("missing customer token");
-      }
-
-      return this.customerToken;
-    });
-
-    window.addEventListener(
-      "message",
-      (event: MessageEvent<AppToSdkMessage>) => {
-        this.listenMessage(event.data);
-      },
-    );
+    const el = document.createElement('div');
+    document.body.appendChild(el);
+    this.appWidget = new AppWidget(config, el, this);
   }
 
-  async initialize() {
-    await this.reloadToken();
+  private widgets: BaseWidget[] = [];
+  private appWidget: AppWidget;
+  private token: string;
+  private tokenTimeout: number;
+  private tokenPromise: Promise<string> | null = null;
+  private refreshTimeoutId: number | null = null;
+
+  /**
+   * Gets the token, refreshing it if necessary.
+   * Utilizes a cache to prevent multiple requests, and only refreshes the token if it is expired (or refresh is true).
+   * @returns The token as a string inside a promise
+   */
+  public async getToken(refresh = false): Promise<string> {
+    if (!refresh && this.tokenTimeout > Date.now()) return this.token;
+    if (this.tokenPromise) return this.tokenPromise;
+    this.tokenPromise = this.tokenFN();
+    this.token = await this.tokenPromise;
+    const body = await parseCustomerJwt(this.token);
+    if (!body) console.error('[OFCP] Failed to parse token, is the tokenFN correctly implemented?');
+    const in60s = Date.now() + 60_000;
+    this.tokenTimeout = body ? Math.max((body.exp * 1_000) - 60_000, in60s) : in60s;
+    this.tokenPromise = null;
+    if (this.refreshTimeoutId) clearTimeout(this.refreshTimeoutId);
+    this.refreshTimeoutId = setTimeout(() => this.refreshToken(), this.tokenTimeout - Date.now());
+    return this.token;
   }
 
-  productDetailWidget(
-    element: HTMLElement,
-    containerId: ContainerId,
-    insertArticles: EAN[] = [],
-  ): ProductDetailWidget {
-    return new ProductDetailWidget(this, element, containerId, insertArticles);
+  /**
+   * Refreshes the token and sends it to all widgets
+   * @param token The token to refresh, or null to get a new token
+   */
+  public async refreshToken(token: string|null): Promise<void> {
+    if (!token) token = await this.getToken(true);
+    for (const widget of this.widgets) widget.sendMessage({
+      type: MessageType.SET_TOKEN,
+      payload: token
+    } as SetTokenMessage);
   }
 
-  cartWidget(element: HTMLElement): CartWidget {
-    return new CartWidget(this, element);
+  /**
+   * Destroys all widgets, and resets the SDK to its initial state
+   */
+  public async destroyAll(): Promise<void> {
+    if (this.refreshTimeoutId) clearTimeout(this.refreshTimeoutId);
+    this.refreshTimeoutId = null;
+    this.appWidget.destroy();
+    for (const widget of this.widgets) widget.destroy();
+    this.widgets = [];
   }
 
-  openApp(): AppWidget {
-    if (this.appWidget) {
-      return this.appWidget;
-    }
+  /**
+   * Internal method to add a widget to the list of widgets, and show it
+   * @param widget The widget to add
+   * @returns The widget
+   */
+  private createWidget(widget: BaseWidget): BaseWidget {
+    this.widgets.push(widget);
+    widget.show();
+    return widget;
+  }
 
-    this.appWidget = new AppWidget(this);
+  /**
+   * Creates a cart widget
+   * @param el The element to attach the widget to
+   * @returns The cart widget
+   */
+  public createCartWidget(el: HTMLElement): CartWidget {
+    return this.createWidget(new CartWidget(this.config, el, this));
+  }
 
+  /**
+   * Creates a product detail widget
+   * @param el The element to attach the widget to
+   * @returns The product detail widget
+   */
+  public createProductDetailWidget(el: HTMLElement): ProductDetailWidget {
+    return this.createWidget(new ProductDetailWidget(this.config, el, this));
+  }
+
+  /**
+   * Gets the app widget
+   * @returns The app widget
+   */
+  public getAppWidget(): AppWidget {
     return this.appWidget;
   }
 
-  closeApp(): void {
-    if (!this.appWidget) {
-      return;
-    }
-
-    this.appWidget.destroy();
-    this.appWidget = null;
+  /**
+   * Gets the config
+   * @returns The config
+   */
+  public getConfig(): OfcpConfig {
+    return this.config;
   }
 
-  async reloadToken(): Promise<void> {
-    try {
-      const token = await this.getCustomerTokenCallback();
-
-      if (token === this.customerToken) {
-        return;
-      }
-
-      if (token === null) {
-        this.logout();
-
-        return;
-      }
-
-      const decodedToken = jwt_decode<DecodedToken>(token);
-
-      this.clearRefreshTimeout();
-
-      this.refreshTimeout = setTimeout(
-        () => {
-          this.reloadToken();
-        },
-        (decodedToken.exp - 30) * 1000 - Date.now(), // refresh 30 seconds before token expires
-      );
-
-      if (this.customerToken) {
-        const previousDecodedToken = jwt_decode<DecodedToken>(
-          this.customerToken,
-        );
-
-        if (previousDecodedToken.sub === decodedToken.sub) {
-          // same customer, just refresh token
-          this.customerToken = token;
-          this.retryCounter = 0;
-          this.eventEmitter.emit("refreshToken", token);
-
-          return;
-        }
-      }
-
-      // new customer
-      this.customerToken = token;
-      this.retryCounter = 0;
-      this.eventEmitter.emit("customerChanged", token);
-    } catch (e) {
-      console.error(e);
-
-      this.clearRefreshTimeout();
-
-      if (this.retryCounter < 3) {
-        // retry 3 times
-        console.warn(`retry in 5 seconds (${this.retryCounter + 1}/3)`);
-        this.retryCounter++;
-
-        this.refreshTimeout = setTimeout(() => {
-          this.reloadToken();
-        }, 5000); // retry in 5 seconds
-
-        return;
-      }
-
-      this.logout();
-    }
+  /**
+   * Gets the widgets
+   * @returns The widgets
+   */
+  public getWidgets(): BaseWidget[] {
+    return this.widgets;
   }
 
-  logout() {
-    this.clearRefreshTimeout();
-
-    this.customerToken = null;
-    this.eventEmitter.emit("customerLogout");
-  }
-
-  getCustomerToken(): CustomerToken | null {
-    return this.customerToken;
-  }
-
-  async getCart(): Promise<Cart> {
-    return this.httpClient.get<Cart>("/cart");
-  }
-
-  on<U extends keyof Listener>(
-    event: U,
-    listener: Listener[U],
-  ): ListenerRemover {
-    this.eventEmitter.on(event, listener);
-
-    return () => {
-      this.eventEmitter.off(event, listener);
-    };
-  }
-
-  off<U extends keyof Listener>(event: U, listener: Listener[U]): void {
-    this.eventEmitter.off(event, listener);
-  }
-
-  emit<U extends keyof Listener>(
-    event: U,
-    ...args: Parameters<Listener[U]>
-  ): void {
-    this.eventEmitter.emit(event, ...args);
-  }
-
-  private listenMessage(message: AppToSdkMessage) {
-    switch (message.type) {
-      case "addToCart":
-        this.eventEmitter.emit(
-          "addToCart",
-          message.itemId,
-          message.quantity,
-          message.price,
-        );
-        break;
-      case "removeFromCart":
-        this.eventEmitter.emit("removeFromCart", message.itemId);
-        break;
-      case "changeCartQuantity":
-        this.eventEmitter.emit(
-          "changeCartQuantity",
-          message.itemId,
-          message.quantity,
-          message.price,
-        );
-        break;
-      case "openApp":
-        this.openApp();
-        break;
-      case "closeApp":
-        this.closeApp();
-        break;
-    }
-  }
-
-  private clearRefreshTimeout() {
-    if (this.refreshTimeout) {
-      clearTimeout(this.refreshTimeout);
-      this.refreshTimeout = null;
-    }
+  /**
+   * Gets the timestamp (in milliseconds) when the token will expire
+   * @returns The timestamp when the token will expire
+   */
+  public getTokenTimeout(): number {
+    return this.tokenTimeout;
   }
 }
-
-export interface Listener {
-  customerChanged: (customerToken: CustomerToken) => void;
-  customerLogout: () => void;
-  refreshToken: (customerToken: CustomerToken) => void;
-  bannerClicked: () => void;
-  addToCart: (itemId: ItemId, quantity: number, price: Price) => void;
-  removeFromCart: (itemId: ItemId) => void;
-  changeCartQuantity: (itemId: ItemId, quantity: number, price: Price) => void;
-}
-
-export interface ListenerRemover {
-  (): void;
-}
-
-export interface Cart {
-  articles: CartItem[];
-  sum: Price;
-}
-
-export interface CartItem {
-  id: ItemId;
-  quantity: number;
-  price: Price;
-}
-
-type DecodedToken = {
-  sub: string;
-  exp: number;
-};
-
-export type Config = {
-  readonly appUrl?: string;
-};

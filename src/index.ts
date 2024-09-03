@@ -1,27 +1,12 @@
-import TecsafeApi, { Config } from "./TecsafeApi";
-import { CustomerToken } from "./CommonTypes";
-import CartWidget from "./CartWidget";
-import AppWidget from "./AppWidget";
-import ProductDetailWidget from "./ProductDetailWidget";
+import { TecsafeApi as tsApiImport } from "./TecsafeApi";
 
-export interface GetCustomerTokenCallback {
-  (): Promise<CustomerToken | null>;
-}
+export * from "./TecsafeApi";
+export * from "./types/BaseWidget";
+export * from "./types/FullscreenWidget";
+export * from "./types/Messages";
+export * from "./types/Config";
+export * from "./widget/AppWidget";
+export * from "./widget/CartWidget";
+export * from "./widget/ProductDetailWidget";
 
-export async function initializeTecsafeApi(
-  getCustomerTokenCallback: GetCustomerTokenCallback,
-  config: Config,
-): Promise<TecsafeApi> {
-  const api = new TecsafeApi(getCustomerTokenCallback, config);
-  await api.initialize();
-
-  return api;
-}
-
-export default {
-  initializeTecsafeApi,
-  TecsafeApi,
-  CartWidget,
-  AppWidget,
-  ProductDetailWidget,
-};
+export default tsApiImport;
