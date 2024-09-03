@@ -56,8 +56,9 @@ export class TecsafeApi {
    * Refreshes the token and sends it to all widgets
    * @param token The token to refresh, or null to get a new token
    */
-  public async refreshToken(token: string|null): Promise<void> {
+  public async refreshToken(token?: string|null): Promise<void> {
     if (!token) token = await this.getToken(true);
+    this.token = token;
     for (const widget of this.widgets) widget.sendMessage({
       type: MessageType.SET_TOKEN,
       payload: token
