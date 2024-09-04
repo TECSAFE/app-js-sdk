@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@tecsafe/jwt-sdk':
-        specifier: ^0.1.0
-        version: 0.1.0
+        specifier: ^0.1.1
+        version: 0.1.1
     devDependencies:
       '@jest/globals':
         specifier: ^29.7.0
@@ -781,8 +781,8 @@ packages:
   '@swc/types@0.1.12':
     resolution: {integrity: sha512-wBJA+SdtkbFhHjTMYH+dEH1y4VpfGdAc2Kw/LK09i9bXd/K6j6PkDcFCEzb6iVfZMkPRrl/q0e3toqTAJdkIVA==}
 
-  '@tecsafe/jwt-sdk@0.1.0':
-    resolution: {integrity: sha512-Lp64SKQkuSYUs6KuwdWz+hqVTOlSBTxFm7EtRU5owKABfNUJrqLifaGTuNYGQ8s6DqDnT3g1BddmwyPNhd9CXg==}
+  '@tecsafe/jwt-sdk@0.1.1':
+    resolution: {integrity: sha512-rBk7+/1K7QEzITiMhj0ls1xWkD9RTaDshpe5i1a5HNKzpoF2XdQuO7ajtSOqaTkMMumkxtn96IghGPs6TETdHw==}
 
   '@trysound/sax@0.2.0':
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
@@ -2534,15 +2534,13 @@ snapshots:
     transitivePeerDependencies:
       - '@parcel/core'
 
-  '@parcel/cache@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)':
+  '@parcel/cache@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))':
     dependencies:
       '@parcel/core': 2.12.0(@swc/helpers@0.5.12)
       '@parcel/fs': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)
       '@parcel/logger': 2.12.0
       '@parcel/utils': 2.12.0
       lmdb: 2.8.5
-    transitivePeerDependencies:
-      - '@swc/helpers'
 
   '@parcel/codeframe@2.12.0':
     dependencies:
@@ -2602,7 +2600,7 @@ snapshots:
   '@parcel/core@2.12.0(@swc/helpers@0.5.12)':
     dependencies:
       '@mischnic/json-sourcemap': 0.1.1
-      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)
+      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))
       '@parcel/diagnostic': 2.12.0
       '@parcel/events': 2.12.0
       '@parcel/fs': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)
@@ -3040,7 +3038,7 @@ snapshots:
 
   '@parcel/types@2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)':
     dependencies:
-      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)
+      '@parcel/cache': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))
       '@parcel/diagnostic': 2.12.0
       '@parcel/fs': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)
       '@parcel/package-manager': 2.12.0(@parcel/core@2.12.0(@swc/helpers@0.5.12))(@swc/helpers@0.5.12)
@@ -3199,7 +3197,7 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@tecsafe/jwt-sdk@0.1.0':
+  '@tecsafe/jwt-sdk@0.1.1':
     dependencies:
       jose: 5.8.0
 
