@@ -1,0 +1,44 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Environment setup
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Install dependencies
+      - name: Install pnpm
+        run: npm i -g pnpm
+      - name: Install dependencies with pnpm
+        run: pnpm install
+
+      # Build and test
+      - name: Build
+        run: pnpm build
+      - name: Lint
+        continue-on-error: true
+        id: lint
+        run: pnpm lint
+      - name: Test
+        run: pnpm test
+
+      # Fail if linting fails
+      - name: Fail if linting fails
+        if: steps.lint.outcome == 'failure'
+        run: exit 1

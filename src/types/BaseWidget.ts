@@ -1,6 +1,6 @@
 import { TecsafeApi } from "../TecsafeApi";
 import { OfcpConfig } from "./Config";
-import { Message, MessageType, SetTokenMessage } from "./Messages"
+import { Message, MessageType, OpenFullScreenMessage, SetTokenMessage } from "./Messages";
 
 /**
  * Base class for all widgets, providing common functionality
@@ -20,7 +20,7 @@ export class BaseWidget {
   /**
    * The path to the iframe which will be appended to the uiOrigin (+ uiSuffix)
    */
-  protected readonly uiPath: string = 'iframe';
+  protected readonly uiPath: string = "iframe";
 
   /**
    * Sends a message to the iframe
@@ -43,26 +43,44 @@ export class BaseWidget {
     if (event.source !== this.iframe.contentWindow) return;
 
     switch (event.data.type) {
-
       case MessageType.REQUEST_TOKEN:
         this.sendMessage({
           type: MessageType.SET_TOKEN,
           payload: await this.api.getToken(),
         } as SetTokenMessage);
         break;
-      
+
       case MessageType.OPEN_FULL_SCREEN:
-        this.api.getAppWidget().show();
+        const data = event.data as OpenFullScreenMessage;
+        this.api.setFullScreenData(data.payload.data);
+        const app = this.api.getAppWidget();
+        app.setPathExtension(data.payload.path);
+        app.show();
         break;
-      
+
       case MessageType.CLOSE_FULL_SCREEN:
         this.api.getAppWidget().hide();
         break;
-      
+
       default:
-        console.error('[OFCP] Widget', this.el, 'received unknown message', event.data);
-      
+        if (!(await this.onMessageExtended(event))) {
+          console.error(
+            "[OFCP] Widget",
+            this.el,
+            "received unknown message",
+            event.data,
+          );
+        }
     }
+  }
+
+  /**
+   * Lifecycle hooks for extending classes
+   * @param event The message event
+   * @returns Promise<boolean> Whether the message was handled
+   */
+  protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
+    return false;
   }
 
   /**
@@ -72,18 +90,18 @@ export class BaseWidget {
   public show(): void {
     this.preShow();
     if (this.iframe) {
-      this.iframe.style.display = 'block';
+      this.iframe.style.display = "block";
       this.postShow();
       return;
     }
     this.preCreate();
-    this.iframe = document.createElement('iframe');
+    this.iframe = document.createElement("iframe");
     this.iframe.src = `${this.config.uiOrigin + this.config.uiSuffix}/${this.uiPath}`;
-    this.iframe.style.width = '100%';
-    this.iframe.style.height = '100%';
-    this.iframe.style.backgroundColor = 'transparent';
-    this.iframe.style.border = 'none';
-    window.addEventListener('message', this.onMessage.bind(this));
+    this.iframe.style.width = "100%";
+    this.iframe.style.height = "100%";
+    this.iframe.style.backgroundColor = "transparent";
+    this.iframe.style.border = "none";
+    window.addEventListener("message", this.onMessage.bind(this));
     this.el.appendChild(this.iframe);
     this.postCreate();
     this.postShow();
@@ -108,7 +126,7 @@ export class BaseWidget {
    * Lifecycle hook for extending classes
    */
   protected postCreate(): void {}
-  
+
   /**
    * Destroys the widget
    * @returns void
@@ -116,7 +134,7 @@ export class BaseWidget {
   public destroy(): void {
     if (!this.iframe) return;
     this.preDestroy();
-    this.el.innerHTML = '';
+    this.el.innerHTML = "";
     this.iframe = null;
     this.postDestroy();
   }
@@ -137,6 +155,6 @@ export class BaseWidget {
    */
   public hide(): void {
     if (!this.iframe) return;
-    this.iframe.style.display = 'none';
+    this.iframe.style.display = "none";
   }
 }

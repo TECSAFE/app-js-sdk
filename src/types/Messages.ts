@@ -2,12 +2,14 @@
  * The type of message sent between the SDK and the iframe
  */
 export enum MessageType {
-  SET_TOKEN = 'set-token',
-  REQUEST_TOKEN = 'request-token',
-  OPEN_FULL_SCREEN = 'open-full-screen',
-  CLOSE_FULL_SCREEN = 'close-full-screen',
-  FULL_SCREEN_OPENED = 'full-screen-opened',
-  FULL_SCREEN_CLOSED = 'full-screen-closed',
+  SET_TOKEN = "set-token",
+  REQUEST_TOKEN = "request-token",
+  OPEN_FULL_SCREEN = "open-full-screen",
+  CLOSE_FULL_SCREEN = "close-full-screen",
+  FULL_SCREEN_OPENED = "full-screen-opened",
+  FULL_SCREEN_CLOSED = "full-screen-closed",
+  FULL_SCREEN_REQUEST_DATA = "full-screen-request-data",
+  FULL_SCREEN_SEND_DATA = "full-screen-send-data",
 }
 
 export type NoPayload = void | null;
@@ -65,7 +67,17 @@ export interface OpenFullScreenMessage extends Message {
   /**
    * The path to open in full screen
    */
-  payload: string;
+  payload: {
+    /**
+     * The path to open in full screen
+     */
+    path: string;
+
+    /**
+     * Additional data to send to the iframe
+     */
+    data?: any;
+  };
 }
 
 /**
@@ -108,4 +120,33 @@ export interface FullScreenClosedMessage extends Message {
    * No payload is necessary
    */
   payload: NoPayload;
+}
+
+/**
+ * Request the SDK to transmit the data value inside of the last
+ * OpenFullScreenMessage payload to the iframe.
+ */
+export interface FullScreenRequestDataMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.FULL_SCREEN_REQUEST_DATA;
+  /**
+   * No payload is necessary
+   */
+  payload: NoPayload;
+}
+
+/**
+ * Send the data value inside of the last OpenFullScreenMessage payload to the iframe.
+ */
+export interface FullScreenSendDataMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.FULL_SCREEN_SEND_DATA;
+  /**
+   * The data to send
+   */
+  payload: any;
 }

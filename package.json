@@ -25,7 +25,9 @@
 	"scripts": {
 		"build": "parcel build",
 		"doc": "typedoc --out docs src/index.ts",
-    "test": "echo \"Error: no test specified\""
+    "test": "echo \"Error: no test specified\"",
+    "lint": "prettier src/* --check",
+    "lint:fix": "prettier src/* --write"
 	},
   "targets": {
     "main": {
