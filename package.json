@@ -1,5 +1,5 @@
 {
-	"name": "app-js-sdk",
+	"name": "@tecsafe/app-js-sdk",
 	"version": "IN-DEV",
 	"description": "Tecsafe App JS SDK for automated IFrame and JWT management",
 	"source": "src/index.ts",
