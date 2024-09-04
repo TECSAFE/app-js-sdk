@@ -20,7 +20,7 @@
 		"typescript": "^5.5.4"
 	},
 	"dependencies": {
-		"@tecsafe/jwt-sdk": "^0.1.0"
+		"@tecsafe/jwt-sdk": "^0.1.1"
 	},
 	"scripts": {
 		"build": "parcel build",
