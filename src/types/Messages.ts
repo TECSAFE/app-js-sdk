@@ -1,3 +1,5 @@
+import { OfcpConfig } from './Config'
+
 /**
  * The type of message sent between the SDK and the iframe
  */
@@ -6,10 +8,11 @@ export enum MessageType {
   REQUEST_TOKEN = 'request-token',
   OPEN_FULL_SCREEN = 'open-full-screen',
   CLOSE_FULL_SCREEN = 'close-full-screen',
+  DESTROY_FULL_SCREEN = 'destroy-full-screen',
   FULL_SCREEN_OPENED = 'full-screen-opened',
   FULL_SCREEN_CLOSED = 'full-screen-closed',
-  FULL_SCREEN_REQUEST_DATA = 'full-screen-request-data',
-  FULL_SCREEN_SEND_DATA = 'full-screen-send-data',
+  STYLES_REQUEST_DATA = 'styles-request-data',
+  STYLES_SEND_DATA = 'styles-send-data',
 }
 
 export type NoPayload = void | null
@@ -65,19 +68,9 @@ export interface OpenFullScreenMessage extends Message {
    */
   type: MessageType.OPEN_FULL_SCREEN
   /**
-   * The path to open in full screen
+   * The url to open in full screen
    */
-  payload: {
-    /**
-     * The path to open in full screen
-     */
-    path: string
-
-    /**
-     * Additional data to send to the iframe
-     */
-    data?: any
-  }
+  payload: string
 }
 
 /**
@@ -88,6 +81,20 @@ export interface CloseFullScreenMessage extends Message {
    * @inheritdoc
    */
   type: MessageType.CLOSE_FULL_SCREEN
+  /**
+   * No payload is necessary
+   */
+  payload: NoPayload
+}
+
+/**
+ * Request the SDK to destroy the full screen ui (aka AppWidget)
+ */
+export interface DestroyFullScreenMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.DESTROY_FULL_SCREEN
   /**
    * No payload is necessary
    */
@@ -123,14 +130,13 @@ export interface FullScreenClosedMessage extends Message {
 }
 
 /**
- * Request the SDK to transmit the data value inside of the last
- * OpenFullScreenMessage payload to the iframe.
+ * Request the sdk to transmit the styles configuration object from the OfcpConfig to the iframe.
  */
-export interface FullScreenRequestDataMessage extends Message {
+export interface StylesRequestMessage extends Message {
   /**
    * @inheritdoc
    */
-  type: MessageType.FULL_SCREEN_REQUEST_DATA
+  type: MessageType.STYLES_REQUEST_DATA
   /**
    * No payload is necessary
    */
@@ -138,15 +144,15 @@ export interface FullScreenRequestDataMessage extends Message {
 }
 
 /**
- * Send the data value inside of the last OpenFullScreenMessage payload to the iframe.
+ * Send the styles configuration object from the OfcpConfig to the iframe.
  */
-export interface FullScreenSendDataMessage extends Message {
+export interface StylesSendDataMessage extends Message {
   /**
    * @inheritdoc
    */
-  type: MessageType.FULL_SCREEN_SEND_DATA
+  type: MessageType.STYLES_SEND_DATA
   /**
-   * The data to send
+   * The styles configuration object
    */
-  payload: any
+  payload: typeof OfcpConfig.prototype.styles
 }

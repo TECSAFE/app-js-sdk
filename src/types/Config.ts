@@ -3,12 +3,17 @@
  */
 export class OfcpConfig {
   /**
-   * The path to the UI, which will be appended to the uiOrigin
+   * The base URL for the widget UIs
    */
-  public uiSuffix: string = '/app-ui'
+  public widgetBaseURL: string = 'https://tecsafe.github.io/app-ui'
 
   /**
-   * The origin of the UI
+   * A list of allowed origins for the SDK to communicate with
    */
-  public uiOrigin: string = 'https://tecsafe.github.io'
+  public allowedOrigins: string[] = ['https://tecsafe.github.io']
+
+  /**
+   * Styles configuration for the apps. TBD.
+   */
+  public styles: any = {}
 }
