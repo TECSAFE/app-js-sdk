@@ -1,30 +1,54 @@
 import { BaseWidget } from './types/BaseWidget'
 import { OfcpConfig } from './types/Config'
-import { MessageType, SetTokenMessage } from './types/Messages'
+import {
+  FullScreenOpenedMessage,
+  Message,
+  MessageType,
+  SetTokenMessage,
+} from './types/Messages'
 import { AppWidget } from './widget/AppWidget'
 import { parseCustomerJwt } from '@tecsafe/jwt-sdk'
 import { CartWidget } from './widget/CartWidget'
 import { ProductDetailWidget } from './widget/ProductDetailWidget'
+import { readUrlParams, clearUrlParams } from './util/UrlParamRW'
 
 /**
  * The main entry point for the OFCP App JS SDK
  */
 export class TecsafeApi {
   /**
-   * The main entry point for the OFCP App JS SDK
+   * The main entry point for the OFCP App JS SDK.
    * This class should only be instantiated after the user has consented to the terms, conditions, and privacy policy!
    * @param tokenFN A function that returns the customer token as a string inside a promise
    * @param config Advanced configuration for the SDK, rarely needed
+   * @throws An error if the configuration is invalid
    */
   constructor(
     private readonly tokenFN: () => Promise<string>,
     private readonly config: OfcpConfig = new OfcpConfig()
   ) {
+    const url = new URL(config.widgetBaseURL)
+    if (!config.allowedOrigins.includes(url.origin)) {
+      throw new Error('The widgetBaseURL must be in the allowedOrigins list')
+    }
     const el = document.createElement('div')
     document.body.appendChild(el)
     this.appWidget = new AppWidget(config, el, this)
+    this.browserId = localStorage.getItem('ofcp-browser-id')
+    if (!this.browserId) {
+      this.browserId = Math.random().toString(36).slice(2)
+      localStorage.setItem('ofcp-browser-id', this.browserId)
+    }
+    const params = readUrlParams()
+    if (this.browserId !== params.browserId) {
+      clearUrlParams()
+      console.warn('[OFCP] Browser ID mismatch, clearing URL params')
+      return
+    }
+    this.openFullScreen(params.url)
   }
 
+  private browserId: string
   private widgets: BaseWidget[] = []
   private appWidget: AppWidget
   private token: string
@@ -32,6 +56,53 @@ export class TecsafeApi {
   private tokenPromise: Promise<string> | null = null
   private refreshTimeoutId: number | null = null
   private fullScreenData: any
+
+  /**
+   * Get the browser ID, a random string that is stored in localStorage.
+   * This is NOT used for tracking, but to identify the browser if the user mistakenly shares the URL with OFCP data in it.
+   * @see {@link clearUrlParams}
+   */
+  public getBrowserId(): string {
+    return this.browserId
+  }
+
+  /**
+   * Opens the AppWidget in full screen mode on the provided url
+   * @param url The url to open in full screen
+   * @throws An error if the url is not in the allowedOrigins list
+   * @see {@link AppWidget}
+   */
+  public openFullScreen(url: string): void {
+    this.appWidget.setUrl(url)
+    this.appWidget.show()
+    this.sendToAllWidgets({
+      type: MessageType.FULL_SCREEN_OPENED,
+      payload: null,
+    } as FullScreenOpenedMessage)
+  }
+
+  /**
+   * Closes the AppWidget full screen mode
+   * @param destroy If true, the widget will be destroyed instead of hidden
+   * @see {@link AppWidget}
+   */
+  public closeFullScreen(destroy = false): void {
+    if (!destroy) this.appWidget.hide()
+    else this.appWidget.destroy()
+    this.sendToAllWidgets({
+      type: MessageType.CLOSE_FULL_SCREEN,
+      payload: null,
+    })
+  }
+
+  /**
+   * Sends a message to all widgets
+   * @param message The message to send
+   */
+  public sendToAllWidgets(message: Message): void {
+    for (const widget of this.widgets) widget.sendMessage(message)
+    this.appWidget.sendMessage(message)
+  }
 
   /**
    * The common method to save the token, and set the timeout for refreshing the token.
@@ -78,11 +149,10 @@ export class TecsafeApi {
   public async refreshToken(token?: string | null): Promise<void> {
     if (token) await this.saveToken(token)
     else token = await this.getToken(true)
-    for (const widget of this.widgets)
-      widget.sendMessage({
-        type: MessageType.SET_TOKEN,
-        payload: token,
-      } as SetTokenMessage)
+    this.sendToAllWidgets({
+      type: MessageType.SET_TOKEN,
+      payload: token,
+    } as SetTokenMessage)
   }
 
   /**

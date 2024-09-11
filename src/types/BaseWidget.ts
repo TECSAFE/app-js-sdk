@@ -5,6 +5,7 @@ import {
   MessageType,
   OpenFullScreenMessage,
   SetTokenMessage,
+  StylesSendDataMessage,
 } from './Messages'
 
 /**
@@ -23,7 +24,7 @@ export class BaseWidget {
   protected iframe: HTMLIFrameElement | null = null
 
   /**
-   * The path to the iframe which will be appended to the uiOrigin (+ uiSuffix)
+   * The path to the iframe which will be appended to the uiBaseURL to get the full URL
    */
   protected readonly uiPath: string = 'iframe'
 
@@ -34,18 +35,32 @@ export class BaseWidget {
    */
   public sendMessage(message: Message): void {
     if (!this.iframe) return
-    this.iframe.contentWindow?.postMessage(message, this.config.uiOrigin)
+    const iframeSrc = new URL(this.iframe.src)
+    const origin = iframeSrc.origin
+    if (!this.config.allowedOrigins.includes(origin)) {
+      console.error(
+        '[OFCP] Widget',
+        this.el,
+        'cannot send message to origin',
+        origin
+      )
+      return
+    }
+    this.iframe.contentWindow?.postMessage(message, origin)
   }
 
   /**
    * Handles messages from the iframe
    * @param event The message event
    * @returns void
+   * @see {@link BaseWidget.onMessageExtended}
    */
   private async onMessage(event: MessageEvent): Promise<void> {
     if (!this.iframe) return
-    if (event.origin !== this.config.uiOrigin) return
+    if (!this.config.allowedOrigins.includes(event.origin)) return
     if (event.source !== this.iframe.contentWindow) return
+    if (typeof event.data !== 'object') return
+    if (!event.data.type) return
 
     switch (event.data.type) {
       case MessageType.REQUEST_TOKEN:
@@ -57,15 +72,27 @@ export class BaseWidget {
 
       case MessageType.OPEN_FULL_SCREEN:
         const data = event.data as OpenFullScreenMessage
-        this.api.setFullScreenData(data.payload.data)
-        const app = this.api.getAppWidget()
-        app.setPathExtension(data.payload.path)
-        app.show()
+        try {
+          this.api.openFullScreen(data.payload)
+        } catch (e) {
+          console.error(
+            '[OFCP] Widget',
+            this.el,
+            'failed to open full screen',
+            e
+          )
+        }
         break
 
       case MessageType.CLOSE_FULL_SCREEN:
         this.api.getAppWidget().hide()
         break
+
+      case MessageType.STYLES_REQUEST_DATA:
+        this.sendMessage({
+          type: MessageType.STYLES_SEND_DATA,
+          payload: this.config.styles,
+        } as StylesSendDataMessage)
 
       default:
         if (!(await this.onMessageExtended(event))) {
@@ -83,6 +110,7 @@ export class BaseWidget {
    * Lifecycle hooks for extending classes
    * @param event The message event
    * @returns Promise<boolean> Whether the message was handled
+   * @see {@link BaseWidget.onMessage}
    */
   protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
     return false
@@ -91,6 +119,7 @@ export class BaseWidget {
   /**
    * Shows the widget, creating it if necessary
    * @returns void
+   * @see {@link BaseWidget.preShow} {@link BaseWidget.preCreate} {@link BaseWidget.postCreate} {@link BaseWidget.postShow}
    */
   public show(): void {
     this.preShow()
@@ -101,11 +130,13 @@ export class BaseWidget {
     }
     this.preCreate()
     this.iframe = document.createElement('iframe')
-    this.iframe.src = `${this.config.uiOrigin + this.config.uiSuffix}/${this.uiPath}`
+    this.iframe.src = `${this.config.widgetBaseURL}/${this.uiPath}`
     this.iframe.style.width = '100%'
     this.iframe.style.height = '100%'
     this.iframe.style.backgroundColor = 'transparent'
     this.iframe.style.border = 'none'
+    // this.iframe.setAttribute('allow', 'camera') // Maybe needed for the editor
+    this.iframe.setAttribute('allowtransparency', 'true')
     window.addEventListener('message', this.onMessage.bind(this))
     this.el.appendChild(this.iframe)
     this.postCreate()
@@ -114,27 +145,32 @@ export class BaseWidget {
 
   /**
    * Lifecycle hook for extending classes
+   * @see {@link BaseWidget.show}
    */
   protected preShow(): void {}
 
   /**
    * Lifecycle hook for extending classes
+   * @see {@link BaseWidget.show}
    */
   protected postShow(): void {}
 
   /**
    * Lifecycle hook for extending classes
+   * @see {@link BaseWidget.show}
    */
   protected preCreate(): void {}
 
   /**
    * Lifecycle hook for extending classes
+   * @see {@link BaseWidget.show}
    */
   protected postCreate(): void {}
 
   /**
    * Destroys the widget
    * @returns void
+   * @see {@link BaseWidget.preDestroy} {@link BaseWidget.postDestroy}
    */
   public destroy(): void {
     if (!this.iframe) return
@@ -146,16 +182,18 @@ export class BaseWidget {
 
   /**
    * Lifecycle hook for extending classes
+   * @see {@link BaseWidget.destroy}
    */
   protected preDestroy(): void {}
 
   /**
    * Lifecycle hook for extending classes
+   * @see {@link BaseWidget.destroy}
    */
   protected postDestroy(): void {}
 
   /**
-   * Hides the widget
+   * Hides the widget, without destroying it
    * @returns void
    */
   public hide(): void {
