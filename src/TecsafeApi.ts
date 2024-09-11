@@ -74,7 +74,6 @@ export class TecsafeApi {
    */
   public openFullScreen(url: string): void {
     this.appWidget.setUrl(url)
-    this.appWidget.show()
     this.sendToAllWidgets({
       type: MessageType.FULL_SCREEN_OPENED,
       payload: null,

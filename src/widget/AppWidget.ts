@@ -25,6 +25,7 @@ export class AppWidget extends BaseWidget {
       )
     }
     this.url = url
+    this.show()
   }
 
   /**
@@ -81,7 +82,14 @@ export class AppWidget extends BaseWidget {
       this.destroy()
       throw new Error(`[OFCP] Widget ${this.el} cannot show without a url`)
     }
-    this.iframe.src = this.uiPath
+    this.iframe.src = this.url
+  }
+
+  /**
+   * @inheritdoc
+   */
+  protected postDestroy(): void {
+    document.body.removeChild(this.el)
   }
 
   /**
