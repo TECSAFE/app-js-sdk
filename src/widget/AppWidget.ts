@@ -25,6 +25,7 @@ export class AppWidget extends BaseWidget {
       )
     }
     this.url = url
+    writeUrlParams({ browserId: this.api.getBrowserId(), url })
     this.show()
   }
 
@@ -82,7 +83,7 @@ export class AppWidget extends BaseWidget {
       this.destroy()
       throw new Error(`[OFCP] Widget ${this.el} cannot show without a url`)
     }
-    this.iframe.src = this.url
+    if (this.iframe.src !== this.url) this.iframe.src = this.url
     const style = document.body.style
     style.overflow = 'hidden'
     if (!style.paddingRight) style.paddingRight = '15px'
