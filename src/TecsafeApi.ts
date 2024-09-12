@@ -31,13 +31,13 @@ export class TecsafeApi {
     if (!config.allowedOrigins.includes(url.origin)) {
       throw new Error('The widgetBaseURL must be in the allowedOrigins list')
     }
-    const el = document.createElement('div')
-    document.body.appendChild(el)
-    this.appWidget = new AppWidget(config, el, this)
-    this.browserId = localStorage.getItem('ofcp-browser-id')
+    this.appWidget = new AppWidget(config, document.createElement('div'), this)
+    // To don't make it to obvious thats a "browserID"
+    // We shorten it to "bid"
+    this.browserId = localStorage.getItem('ofcp-bid')
     if (!this.browserId) {
       this.browserId = Math.random().toString(36).slice(2)
-      localStorage.setItem('ofcp-browser-id', this.browserId)
+      localStorage.setItem('ofcp-bid', this.browserId)
     }
     const params = readUrlParams()
     if (this.browserId !== params.browserId) {

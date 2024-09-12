@@ -5,7 +5,7 @@ export class OfcpConfig {
   /**
    * The base URL for the widget UIs
    */
-  public widgetBaseURL: string = 'https://tecsafe.github.io/app-ui'
+  public widgetBaseURL: string = 'https://tecsafe.github.io/app-ui/iframe'
 
   /**
    * A list of allowed origins for the SDK to communicate with

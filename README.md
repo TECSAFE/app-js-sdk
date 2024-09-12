@@ -4,6 +4,12 @@ The TECSAFE App-JS-SDK provides a convenience wrapper to interact with the TECSA
 
 ## API Usage
 
+The App-JS-SDK is on npm publicly available. You can install it via npm or yarn.
+
+```bash
+npm install @tecsafe/app-js-sdk
+```
+
 ### Initialize the SDK
 
 ```js
@@ -14,6 +20,8 @@ const api = new TecsafeAPI(async () => {
   return json.token;
 });
 ```
+
+It is important to only instantiate the API once, as other wise the SDK could fetch multiple tokens.
 
 ### Create a Widget
 
@@ -41,4 +49,38 @@ If an user withdraws consent, or the user navigates away from the page (relevant
 
 ```js
 api.destroy();
+```
+
+## Example Implementation
+
+```html
+<template>
+  <shop-base>
+    <product-preview />
+    <div ref="container" />
+    <product-detail />
+    <product-comments />
+  </shop-base>
+</template>
+
+<script lang="ts" setup>
+import { TecsafeApi } from '@tecsafe/app-js-sdk';
+const container = ref<HTMLElement | null>(null);
+const api = ref<TecsafeApi | null>(null);
+
+onMounted(() => {
+  if (!container.value) throw new Error("Container not found");
+  api.value = new TecsafeApi(async () => {
+    const response = await fetch("https://mybackend.com/tecsafe/token");
+    const json = await response.json();
+    return json.token;
+  });
+  api.value.createCartWidget(container.value);
+});
+
+onBeforeUnmount(() => {
+  if (!api.value) return;
+  api.value.destroyAll();
+});
+</script>
 ```

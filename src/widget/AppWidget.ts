@@ -83,13 +83,33 @@ export class AppWidget extends BaseWidget {
       throw new Error(`[OFCP] Widget ${this.el} cannot show without a url`)
     }
     this.iframe.src = this.url
+    const style = document.body.style
+    style.overflow = 'hidden'
+    if (!style.paddingRight) style.paddingRight = '15px'
+  }
+
+  /**
+   * Resets the parent page to its original state after the widget is hidden or destroyed
+   */
+  protected resetParentPage() {
+    const style = document.body.style
+    style.overflow = ''
+    if (style.paddingRight === '15px') style.paddingRight = ''
   }
 
   /**
    * @inheritdoc
    */
   protected postDestroy(): void {
+    this.resetParentPage()
     document.body.removeChild(this.el)
+  }
+
+  /**
+   * @inheritdoc
+   */
+  protected postHide(): void {
+    this.resetParentPage()
   }
 
   /**

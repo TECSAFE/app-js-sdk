@@ -24,6 +24,14 @@ export class BaseWidget {
   protected iframe: HTMLIFrameElement | null = null
 
   /**
+   * Gets the iframe element
+   * @returns The iframe element or null if it doesn't exist currently
+   */
+  public getIframe(): HTMLIFrameElement | null {
+    return this.iframe
+  }
+
+  /**
    * The path to the iframe which will be appended to the uiBaseURL to get the full URL
    */
   protected readonly uiPath: string = 'iframe'
@@ -85,7 +93,11 @@ export class BaseWidget {
         break
 
       case MessageType.CLOSE_FULL_SCREEN:
-        this.api.getAppWidget().hide()
+        this.api.closeFullScreen()
+        break
+
+      case MessageType.DESTROY_FULL_SCREEN:
+        this.api.closeFullScreen(true)
         break
 
       case MessageType.STYLES_REQUEST_DATA:
@@ -198,6 +210,18 @@ export class BaseWidget {
    */
   public hide(): void {
     if (!this.iframe) return
+    this.preHide()
     this.iframe.style.display = 'none'
+    this.postHide()
   }
+
+  /**
+   * Lifecycle hook for extending classes
+   */
+  protected preHide(): void {}
+
+  /**
+   * Lifecycle hook for extending classes
+   */
+  protected postHide(): void {}
 }
