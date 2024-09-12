@@ -1,5 +1,5 @@
 import { BaseWidget } from '../types/BaseWidget'
-import { writeUrlParams } from '../util/UrlParamRW'
+import { writeUrlParams, clearUrlParams } from '../util/UrlParamRW'
 
 /**
  * A widget that takes up the full screen, and is used to display different parts of the app.
@@ -72,7 +72,6 @@ export class AppWidget extends BaseWidget {
       this.destroy()
       console.error('[OFCP] Widget', this.el, 'cannot load url', url)
     }
-    writeUrlParams({ browserId: this.api.getBrowserId(), url })
   }
 
   /**
@@ -87,6 +86,7 @@ export class AppWidget extends BaseWidget {
     const style = document.body.style
     style.overflow = 'hidden'
     if (!style.paddingRight) style.paddingRight = '15px'
+    writeUrlParams({ browserId: this.api.getBrowserId(), url: this.url })
   }
 
   /**
@@ -96,6 +96,7 @@ export class AppWidget extends BaseWidget {
     const style = document.body.style
     style.overflow = ''
     if (style.paddingRight === '15px') style.paddingRight = ''
+    clearUrlParams()
   }
 
   /**
