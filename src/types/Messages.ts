@@ -4,6 +4,8 @@ import { OfcpConfig } from './Config'
  * The type of message sent between the SDK and the iframe
  */
 export enum MessageType {
+  PING = 'tecsafe-ofcp-ping',
+  PONG = 'tecsafe-ofcp-pong',
   SET_TOKEN = 'set-token',
   REQUEST_TOKEN = 'request-token',
   OPEN_FULL_SCREEN = 'open-full-screen',
@@ -11,6 +13,7 @@ export enum MessageType {
   DESTROY_FULL_SCREEN = 'destroy-full-screen',
   FULL_SCREEN_OPENED = 'full-screen-opened',
   FULL_SCREEN_CLOSED = 'full-screen-closed',
+  UPDATE_FULL_SCREEN_URL = 'update-full-screen-url',
   STYLES_REQUEST_DATA = 'styles-request-data',
   STYLES_SEND_DATA = 'styles-send-data',
 }
@@ -155,4 +158,32 @@ export interface StylesSendDataMessage extends Message {
    * The styles configuration object
    */
   payload: typeof OfcpConfig.prototype.styles
+}
+
+/**
+ * Request a pong message from the target, which can be either the SDK or the iframe
+ */
+export interface PingMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.PING
+  /**
+   * The current version of the sender. Expected to be semantically versioned or the string 'IN-DEV'.
+   */
+  payload: string
+}
+
+/**
+ * Respond to a ping message from the target, which can be either the SDK or the iframe
+ */
+export interface PongMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.PONG
+  /**
+   * The current version of the sender. Expected to be semantically versioned or the string 'IN-DEV'.
+   */
+  payload: string
 }

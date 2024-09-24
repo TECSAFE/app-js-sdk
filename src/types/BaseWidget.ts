@@ -4,6 +4,7 @@ import {
   Message,
   MessageType,
   OpenFullScreenMessage,
+  PongMessage,
   SetTokenMessage,
   StylesSendDataMessage,
 } from './Messages'
@@ -105,6 +106,13 @@ export class BaseWidget {
           type: MessageType.STYLES_SEND_DATA,
           payload: this.config.styles,
         } as StylesSendDataMessage)
+
+      case MessageType.PING:
+        this.sendMessage({
+          type: MessageType.PONG,
+          payload: 'version here',
+        } as PongMessage)
+        break
 
       default:
         if (!(await this.onMessageExtended(event))) {
