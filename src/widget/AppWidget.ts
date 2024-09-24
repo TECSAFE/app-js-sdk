@@ -1,4 +1,5 @@
 import { BaseWidget } from '../types/BaseWidget'
+import { MessageType } from '../types/Messages'
 import { writeUrlParams, clearUrlParams } from '../util/UrlParamRW'
 
 /**
@@ -59,6 +60,16 @@ export class AppWidget extends BaseWidget {
     this.iframe.style.width = '100vw'
     this.iframe.style.height = '100vh'
     this.iframe.style.zIndex = '9999999999'
+  }
+
+  /**
+   * @inheritdoc
+   */
+  protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
+    if (event.data.type !== MessageType.UPDATE_FULL_SCREEN_URL) return false
+    const url = event.data.payload as string
+    writeUrlParams({ browserId: this.api.getBrowserId(), url })
+    return true
   }
 
   /**
