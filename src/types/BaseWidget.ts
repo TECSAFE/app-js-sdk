@@ -1,4 +1,5 @@
 import { TecsafeApi } from '../TecsafeApi'
+import { SDK_VERSION } from '../util/Version'
 import { OfcpConfig } from './Config'
 import {
   Message,
@@ -110,7 +111,7 @@ export class BaseWidget {
       case MessageType.PING:
         this.sendMessage({
           type: MessageType.PONG,
-          payload: 'version here',
+          payload: SDK_VERSION,
         } as PongMessage)
         break
 
