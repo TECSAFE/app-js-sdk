@@ -54,12 +54,13 @@ export class AppWidget extends BaseWidget {
    */
   protected postCreate(): void {
     if (!this.iframe) return
-    this.iframe.style.position = 'fixed'
-    this.iframe.style.top = '0'
-    this.iframe.style.left = '0'
-    this.iframe.style.width = '100vw'
-    this.iframe.style.height = '100vh'
-    this.iframe.style.zIndex = '9999999999'
+    const style = this.iframe.style
+    style.position = 'fixed'
+    style.top = '0'
+    style.left = '0'
+    style.width = '100vw'
+    style.height = '100vh'
+    style.zIndex = '1000000'
   }
 
   /**
