@@ -23,6 +23,10 @@ jobs:
       - name: Install dependencies with pnpm
         run: pnpm install
 
+      # Update version in code
+      - name: Replace version in Version.ts to be semver compatible
+        run: sed -i "s/IN-DEV/$(echo $GITHUB_REF | sed 's/refs\/tags\///')/" src/util/Version.ts
+
       # Build and test
       - name: Build
         run: pnpm build
@@ -43,9 +47,6 @@ jobs:
       # Final touches
       - name: Replace version in package.json to be semver compatible
         run: sed -i "s/IN-DEV/$(echo $GITHUB_REF | sed 's/refs\/tags\///')/" package.json
-
-      - name: Replace version in Version.ts to be the same as package.json
-        run: sed -i "s/IN-DEV/$(echo $GITHUB_REF | sed 's/refs\/tags\///')/" src/util/Version.ts
 
       # Publish to registries
       - name: Publish package on NPM
