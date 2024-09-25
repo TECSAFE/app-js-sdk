@@ -13,6 +13,7 @@ export enum MessageType {
   DESTROY_FULL_SCREEN = 'destroy-full-screen',
   FULL_SCREEN_OPENED = 'full-screen-opened',
   FULL_SCREEN_CLOSED = 'full-screen-closed',
+  REQUEST_FULL_SCREEN_STATE = 'request-full-screen-state',
   UPDATE_FULL_SCREEN_URL = 'update-full-screen-url',
   STYLES_REQUEST_DATA = 'styles-request-data',
   STYLES_SEND_DATA = 'styles-send-data',
@@ -126,6 +127,20 @@ export interface FullScreenClosedMessage extends Message {
    * @inheritdoc
    */
   type: MessageType.FULL_SCREEN_CLOSED
+  /**
+   * No payload is necessary
+   */
+  payload: NoPayload
+}
+
+/**
+ * Request the sdk to send the full screen state to the iframe
+ */
+export interface RequestFullScreenStateMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.REQUEST_FULL_SCREEN_STATE
   /**
    * No payload is necessary
    */

@@ -1,6 +1,7 @@
 import { BaseWidget } from './types/BaseWidget'
 import { OfcpConfig } from './types/Config'
 import {
+  FullScreenClosedMessage,
   FullScreenOpenedMessage,
   Message,
   MessageType,
@@ -89,9 +90,9 @@ export class TecsafeApi {
     if (!destroy) this.appWidget.hide()
     else this.appWidget.destroy()
     this.sendToAllWidgets({
-      type: MessageType.CLOSE_FULL_SCREEN,
+      type: MessageType.FULL_SCREEN_CLOSED,
       payload: null,
-    })
+    } as FullScreenClosedMessage)
   }
 
   /**

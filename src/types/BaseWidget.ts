@@ -2,6 +2,8 @@ import { TecsafeApi } from '../TecsafeApi'
 import { SDK_VERSION } from '../util/Version'
 import { OfcpConfig } from './Config'
 import {
+  FullScreenClosedMessage,
+  FullScreenOpenedMessage,
   Message,
   MessageType,
   OpenFullScreenMessage,
@@ -115,15 +117,17 @@ export class BaseWidget {
         } as PongMessage)
         break
 
-      default:
-        if (!(await this.onMessageExtended(event))) {
-          console.error(
-            '[OFCP] Widget',
-            this.el,
-            'received unknown message',
-            event.data
-          )
+      case MessageType.REQUEST_FULL_SCREEN_STATE:
+        if (this.api.getAppWidget().isOpen()) {
+          this.sendMessage({
+            type: MessageType.FULL_SCREEN_OPENED,
+          } as FullScreenOpenedMessage)
+        } else {
+          this.sendMessage({
+            type: MessageType.FULL_SCREEN_CLOSED,
+          } as FullScreenClosedMessage)
         }
+        break
     }
   }
 
@@ -135,6 +139,15 @@ export class BaseWidget {
    */
   protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
     return false
+  }
+
+  /**
+   * Returns whether the widget is open or not
+   * @returns True if the widget is open, false otherwise
+   */
+  public isOpen(): boolean {
+    if (!this.iframe) return false
+    return this.iframe.style.display != 'none'
   }
 
   /**
@@ -196,6 +209,7 @@ export class BaseWidget {
   public destroy(): void {
     if (!this.iframe) return
     this.preDestroy()
+    window.removeEventListener('message', this.onMessage.bind(this))
     this.el.innerHTML = ''
     this.iframe = null
     this.postDestroy()
