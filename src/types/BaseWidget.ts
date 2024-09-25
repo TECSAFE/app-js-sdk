@@ -196,6 +196,7 @@ export class BaseWidget {
   public destroy(): void {
     if (!this.iframe) return
     this.preDestroy()
+    window.removeEventListener('message', this.onMessage.bind(this))
     this.el.innerHTML = ''
     this.iframe = null
     this.postDestroy()
