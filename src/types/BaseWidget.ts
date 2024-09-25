@@ -116,7 +116,7 @@ export class BaseWidget {
           payload: SDK_VERSION,
         } as PongMessage)
         break
-      
+
       case MessageType.REQUEST_FULL_SCREEN_STATE:
         if (this.api.getAppWidget().isOpen()) {
           this.sendMessage({
@@ -147,7 +147,7 @@ export class BaseWidget {
    */
   public isOpen(): boolean {
     if (!this.iframe) return false
-    return this.iframe.style.display != 'none';
+    return this.iframe.style.display != 'none'
   }
 
   /**
