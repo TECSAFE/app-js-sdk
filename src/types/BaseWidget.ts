@@ -12,7 +12,7 @@ import {
   PongMessage,
   SetTokenMessage,
   StylesSendDataMessage,
-} from './Messages'
+} from './messages'
 
 /**
  * Base class for all widgets, providing common functionality

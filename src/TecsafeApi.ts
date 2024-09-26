@@ -6,7 +6,7 @@ import {
   Message,
   MessageType,
   SetTokenMessage,
-} from './types/Messages'
+} from './types/messages'
 import { AppWidget } from './widget/AppWidget'
 import { parseCustomerJwt } from '@tecsafe/jwt-sdk'
 import { CartWidget } from './widget/CartWidget'

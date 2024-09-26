@@ -2,7 +2,7 @@ import { TecsafeApi as tsApiImport } from './TecsafeApi'
 
 export * from './TecsafeApi'
 export * from './types/BaseWidget'
-export * from './types/Messages'
+export * from './types/messages'
 export * from './types/Config'
 export * from './types/EventType'
 export * from './util/UrlParamRW'
