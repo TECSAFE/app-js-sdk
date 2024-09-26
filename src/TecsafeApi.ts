@@ -42,7 +42,7 @@ export class TecsafeApi {
       localStorage.setItem('ofcp-bid', this.browserId)
     }
     const params = readUrlParams()
-    if (this.browserId !== params.browserId) {
+    if (params.browserId && this.browserId !== params.browserId) {
       clearUrlParams()
       console.warn('[OFCP] Browser ID mismatch, clearing URL params')
       return
