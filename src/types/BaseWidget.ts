@@ -23,7 +23,7 @@ export class BaseWidget {
     protected el: HTMLElement,
     protected readonly api: TecsafeApi
   ) {
-    window.addEventListener('message', this.onMessage)
+    window.addEventListener('message', this.onMessage.bind(this))
   }
 
   /**
