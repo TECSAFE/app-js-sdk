@@ -32,14 +32,6 @@ export class BaseWidget {
   protected iframe: HTMLIFrameElement | null = null
 
   /**
-   * Gets the iframe element
-   * @returns The iframe element or null if it doesn't exist currently
-   */
-  public getIframe(): HTMLIFrameElement | null {
-    return this.iframe
-  }
-
-  /**
    * The path to the iframe which will be appended to the uiBaseURL to get the full URL
    */
   protected readonly uiPath: string = 'iframe'
@@ -151,25 +143,6 @@ export class BaseWidget {
   }
 
   /**
-   * Lifecycle hooks for extending classes
-   * @param event The message event
-   * @returns Promise<boolean> Whether the message was handled
-   * @see {@link BaseWidget.onMessage}
-   */
-  protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
-    return false
-  }
-
-  /**
-   * Returns whether the widget is open or not
-   * @returns True if the widget is open, false otherwise
-   */
-  public isOpen(): boolean {
-    if (!this.iframe) return false
-    return this.iframe.style.display != 'none'
-  }
-
-  /**
    * Shows the widget, creating it if necessary
    * @returns void
    * @see {@link BaseWidget.preShow} {@link BaseWidget.preCreate} {@link BaseWidget.postCreate} {@link BaseWidget.postShow}
@@ -193,6 +166,57 @@ export class BaseWidget {
     this.el.appendChild(this.iframe)
     this.postCreate()
     this.postShow()
+  }
+
+  /**
+   * Returns whether the widget is open or not
+   * @returns True if the widget is open, false otherwise
+   */
+  public isOpen(): boolean {
+    if (!this.iframe) return false
+    return this.iframe.style.display != 'none'
+  }
+
+  /**
+   * Gets the iframe element
+   * @returns The iframe element or null if it doesn't exist currently
+   */
+  public getIframe(): HTMLIFrameElement | null {
+    return this.iframe
+  }
+
+  /**
+   * Destroys the widget
+   * @returns void
+   * @see {@link BaseWidget.preDestroy} {@link BaseWidget.postDestroy}
+   */
+  public destroy(): void {
+    if (!this.iframe) return
+    this.preDestroy()
+    this.el.innerHTML = ''
+    this.iframe = null
+    this.postDestroy()
+  }
+
+  /**
+   * Hides the widget, without destroying it
+   * @returns void
+   */
+  public hide(): void {
+    if (!this.iframe) return
+    this.preHide()
+    this.iframe.style.display = 'none'
+    this.postHide()
+  }
+
+  /**
+   * Lifecycle hooks for extending classes
+   * @param event The message event
+   * @returns Promise<boolean> Whether the message was handled
+   * @see {@link BaseWidget.onMessage}
+   */
+  protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
+    return false
   }
 
   /**
@@ -220,19 +244,6 @@ export class BaseWidget {
   protected postCreate(): void {}
 
   /**
-   * Destroys the widget
-   * @returns void
-   * @see {@link BaseWidget.preDestroy} {@link BaseWidget.postDestroy}
-   */
-  public destroy(): void {
-    if (!this.iframe) return
-    this.preDestroy()
-    this.el.innerHTML = ''
-    this.iframe = null
-    this.postDestroy()
-  }
-
-  /**
    * Lifecycle hook for extending classes
    * @see {@link BaseWidget.destroy}
    */
@@ -243,17 +254,6 @@ export class BaseWidget {
    * @see {@link BaseWidget.destroy}
    */
   protected postDestroy(): void {}
-
-  /**
-   * Hides the widget, without destroying it
-   * @returns void
-   */
-  public hide(): void {
-    if (!this.iframe) return
-    this.preHide()
-    this.iframe.style.display = 'none'
-    this.postHide()
-  }
 
   /**
    * Lifecycle hook for extending classes
