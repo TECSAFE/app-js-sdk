@@ -2,15 +2,17 @@ import { TecsafeApi } from '../TecsafeApi'
 import { SDK_VERSION } from '../util/Version'
 import { OfcpConfig } from './Config'
 import {
+  CallParentEventMessage,
   FullScreenClosedMessage,
   FullScreenOpenedMessage,
   Message,
   MessageType,
+  MetaSendDataMessage,
   OpenFullScreenMessage,
   PongMessage,
   SetTokenMessage,
   StylesSendDataMessage,
-} from './Messages'
+} from './messages'
 
 /**
  * Base class for all widgets, providing common functionality
@@ -20,20 +22,14 @@ export class BaseWidget {
     protected readonly config: OfcpConfig,
     protected el: HTMLElement,
     protected readonly api: TecsafeApi
-  ) {}
+  ) {
+    window.addEventListener('message', this.onMessage)
+  }
 
   /**
    * The iframe element
    */
   protected iframe: HTMLIFrameElement | null = null
-
-  /**
-   * Gets the iframe element
-   * @returns The iframe element or null if it doesn't exist currently
-   */
-  public getIframe(): HTMLIFrameElement | null {
-    return this.iframe
-  }
 
   /**
    * The path to the iframe which will be appended to the uiBaseURL to get the full URL
@@ -117,6 +113,21 @@ export class BaseWidget {
         } as PongMessage)
         break
 
+      case MessageType.CALL_PARENT_EVENT:
+        const callEvent = event.data as CallParentEventMessage
+        const listeners = this.api.getEventListeners()[callEvent.payload.event]
+        for (const fn of listeners) fn(...(callEvent.payload.args || []))
+        break
+
+      case MessageType.META_REQUEST_DATA:
+        this.sendMessage({
+          type: MessageType.META_SEND_DATA,
+          payload: {
+            registeredEvents: Object.keys(this.api.getEventListeners()),
+          },
+        } as MetaSendDataMessage)
+        break
+
       case MessageType.REQUEST_FULL_SCREEN_STATE:
         if (this.api.getAppWidget().isOpen()) {
           this.sendMessage({
@@ -129,25 +140,6 @@ export class BaseWidget {
         }
         break
     }
-  }
-
-  /**
-   * Lifecycle hooks for extending classes
-   * @param event The message event
-   * @returns Promise<boolean> Whether the message was handled
-   * @see {@link BaseWidget.onMessage}
-   */
-  protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
-    return false
-  }
-
-  /**
-   * Returns whether the widget is open or not
-   * @returns True if the widget is open, false otherwise
-   */
-  public isOpen(): boolean {
-    if (!this.iframe) return false
-    return this.iframe.style.display != 'none'
   }
 
   /**
@@ -171,10 +163,60 @@ export class BaseWidget {
     this.iframe.style.border = 'none'
     // this.iframe.setAttribute('allow', 'camera') // Maybe needed for the editor
     this.iframe.setAttribute('allowtransparency', 'true')
-    window.addEventListener('message', this.onMessage.bind(this))
     this.el.appendChild(this.iframe)
     this.postCreate()
     this.postShow()
+  }
+
+  /**
+   * Returns whether the widget is open or not
+   * @returns True if the widget is open, false otherwise
+   */
+  public isOpen(): boolean {
+    if (!this.iframe) return false
+    return this.iframe.style.display != 'none'
+  }
+
+  /**
+   * Gets the iframe element
+   * @returns The iframe element or null if it doesn't exist currently
+   */
+  public getIframe(): HTMLIFrameElement | null {
+    return this.iframe
+  }
+
+  /**
+   * Destroys the widget
+   * @returns void
+   * @see {@link BaseWidget.preDestroy} {@link BaseWidget.postDestroy}
+   */
+  public destroy(): void {
+    if (!this.iframe) return
+    this.preDestroy()
+    this.el.innerHTML = ''
+    this.iframe = null
+    this.postDestroy()
+  }
+
+  /**
+   * Hides the widget, without destroying it
+   * @returns void
+   */
+  public hide(): void {
+    if (!this.iframe) return
+    this.preHide()
+    this.iframe.style.display = 'none'
+    this.postHide()
+  }
+
+  /**
+   * Lifecycle hooks for extending classes
+   * @param event The message event
+   * @returns Promise<boolean> Whether the message was handled
+   * @see {@link BaseWidget.onMessage}
+   */
+  protected async onMessageExtended(event: MessageEvent): Promise<boolean> {
+    return false
   }
 
   /**
@@ -202,20 +244,6 @@ export class BaseWidget {
   protected postCreate(): void {}
 
   /**
-   * Destroys the widget
-   * @returns void
-   * @see {@link BaseWidget.preDestroy} {@link BaseWidget.postDestroy}
-   */
-  public destroy(): void {
-    if (!this.iframe) return
-    this.preDestroy()
-    window.removeEventListener('message', this.onMessage.bind(this))
-    this.el.innerHTML = ''
-    this.iframe = null
-    this.postDestroy()
-  }
-
-  /**
    * Lifecycle hook for extending classes
    * @see {@link BaseWidget.destroy}
    */
@@ -226,17 +254,6 @@ export class BaseWidget {
    * @see {@link BaseWidget.destroy}
    */
   protected postDestroy(): void {}
-
-  /**
-   * Hides the widget, without destroying it
-   * @returns void
-   */
-  public hide(): void {
-    if (!this.iframe) return
-    this.preHide()
-    this.iframe.style.display = 'none'
-    this.postHide()
-  }
 
   /**
    * Lifecycle hook for extending classes

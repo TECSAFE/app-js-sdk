@@ -6,12 +6,13 @@ import {
   Message,
   MessageType,
   SetTokenMessage,
-} from './types/Messages'
+} from './types/messages'
 import { AppWidget } from './widget/AppWidget'
 import { parseCustomerJwt } from '@tecsafe/jwt-sdk'
 import { CartWidget } from './widget/CartWidget'
 import { ProductDetailWidget } from './widget/ProductDetailWidget'
 import { readUrlParams, clearUrlParams } from './util/UrlParamRW'
+import { EventType } from './types/EventType'
 
 /**
  * The main entry point for the OFCP App JS SDK
@@ -41,7 +42,7 @@ export class TecsafeApi {
       localStorage.setItem('ofcp-bid', this.browserId)
     }
     const params = readUrlParams()
-    if (this.browserId !== params.browserId) {
+    if (params.browserId && this.browserId !== params.browserId) {
       clearUrlParams()
       console.warn('[OFCP] Browser ID mismatch, clearing URL params')
       return
@@ -57,6 +58,62 @@ export class TecsafeApi {
   private tokenPromise: Promise<string> | null = null
   private refreshTimeoutId: number | null = null
   private fullScreenData: any
+  private eventListeners: { [key: string]: ((...args: any[]) => void)[] } = {}
+
+  /**
+   * Adds an event listener to the SDK
+   * @param event The event to listen for, see {@link EventType}
+   * @param listener The listener to call when the event is triggered.
+   */
+  public addEventListener(
+    event: EventType,
+    listener: (...args: any[]) => void
+  ): void {
+    if (!this.eventListeners[event]) this.eventListeners[event] = []
+    this.eventListeners[event].push(listener)
+  }
+
+  /**
+   * Removes an event listener from the SDK
+   * @param event The event to remove the listener from
+   * @param listener The listener to remove
+   */
+  public removeEventListener(
+    event: EventType,
+    listener: (...args: any[]) => void
+  ): void {
+    if (!this.eventListeners[event]) return
+    const index = this.eventListeners[event].indexOf(listener)
+    if (index !== -1) this.eventListeners[event].splice(index, 1)
+    if (this.eventListeners[event].length === 0)
+      delete this.eventListeners[event]
+  }
+
+  /**
+   * Gets all event listeners
+   * @returns An object with the event names as keys, and the listeners as values
+   */
+  public getEventListeners(): { [key: string]: ((...args: any[]) => void)[] } {
+    return this.eventListeners
+  }
+
+  // /**
+  //  * Sets the onRequestLogin callback. If provided, and user is guest, some widget might display a login button.
+  //  * The function should open a login dialog or redirect the user to the login page.
+  //  * @param onRequestLogin The callback to set, or null to remove it
+  //  */
+  // public setOnRequestLogin(onRequestLogin: () => void | null): void {
+  //   this.onRequestLogin = onRequestLogin
+  // }
+
+  // /**
+  //  * Gets the onRequestLogin callback
+  //  * @see {@link setOnRequestLogin}
+  //  * @returns The onRequestLogin callback
+  //  */
+  // public getOnRequestLogin(): () => void | null {
+  //   return this.onRequestLogin
+  // }
 
   /**
    * Get the browser ID, a random string that is stored in localStorage.

@@ -1,5 +1,5 @@
 import { BaseWidget } from '../types/BaseWidget'
-import { MessageType } from '../types/Messages'
+import { MessageType } from '../types/messages'
 import { writeUrlParams, clearUrlParams } from '../util/UrlParamRW'
 
 /**
