@@ -22,7 +22,9 @@ export class BaseWidget {
     protected readonly config: OfcpConfig,
     protected el: HTMLElement,
     protected readonly api: TecsafeApi
-  ) {}
+  ) {
+    window.addEventListener('message', this.onMessage)
+  }
 
   /**
    * The iframe element
@@ -188,7 +190,6 @@ export class BaseWidget {
     this.iframe.style.border = 'none'
     // this.iframe.setAttribute('allow', 'camera') // Maybe needed for the editor
     this.iframe.setAttribute('allowtransparency', 'true')
-    window.addEventListener('message', this.onMessage.bind(this))
     this.el.appendChild(this.iframe)
     this.postCreate()
     this.postShow()
@@ -226,7 +227,6 @@ export class BaseWidget {
   public destroy(): void {
     if (!this.iframe) return
     this.preDestroy()
-    window.removeEventListener('message', this.onMessage.bind(this))
     this.el.innerHTML = ''
     this.iframe = null
     this.postDestroy()
