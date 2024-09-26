@@ -2,10 +2,12 @@ import { TecsafeApi } from '../TecsafeApi'
 import { SDK_VERSION } from '../util/Version'
 import { OfcpConfig } from './Config'
 import {
+  CallParentEventMessage,
   FullScreenClosedMessage,
   FullScreenOpenedMessage,
   Message,
   MessageType,
+  MetaSendDataMessage,
   OpenFullScreenMessage,
   PongMessage,
   SetTokenMessage,
@@ -115,6 +117,21 @@ export class BaseWidget {
           type: MessageType.PONG,
           payload: SDK_VERSION,
         } as PongMessage)
+        break
+
+      case MessageType.CALL_PARENT_EVENT:
+        const callEvent = event.data as CallParentEventMessage
+        const listeners = this.api.getEventListeners()[callEvent.payload.event]
+        for (const fn of listeners) fn(...(callEvent.payload.args || []))
+        break
+
+      case MessageType.META_REQUEST_DATA:
+        this.sendMessage({
+          type: MessageType.META_SEND_DATA,
+          payload: {
+            registeredEvents: Object.keys(this.api.getEventListeners()),
+          },
+        } as MetaSendDataMessage)
         break
 
       case MessageType.REQUEST_FULL_SCREEN_STATE:

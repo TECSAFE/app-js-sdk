@@ -17,6 +17,9 @@ export enum MessageType {
   UPDATE_FULL_SCREEN_URL = 'update-full-screen-url',
   STYLES_REQUEST_DATA = 'styles-request-data',
   STYLES_SEND_DATA = 'styles-send-data',
+  META_REQUEST_DATA = 'meta-request-data',
+  META_SEND_DATA = 'meta-send-data',
+  CALL_PARENT_EVENT = 'call-parent-event',
 }
 
 export type NoPayload = void | null
@@ -201,4 +204,61 @@ export interface PongMessage extends Message {
    * The current version of the sender. Expected to be semantically versioned or the string 'IN-DEV'.
    */
   payload: string
+}
+
+/**
+ * Request the SDK to call a parent event with the given name and payload
+ * @see {@link TecsafeApi.addEventListener}
+ */
+export interface CallParentEventMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.CALL_PARENT_EVENT
+  /**
+   * The event name and arguments to pass to the event
+   */
+  payload: {
+    /**
+     * The name of the event to call
+     */
+    event: string
+    /**
+     * The arguments to pass to the event
+     */
+    args?: any[]
+  }
+}
+
+/**
+ * Request the SDK to send the meta data to the iframe
+ */
+export interface MetaRequestMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.META_REQUEST_DATA
+  /**
+   * No payload is necessary
+   */
+  payload: NoPayload
+}
+
+/**
+ * Send the meta data to the iframe
+ */
+export interface MetaSendDataMessage extends Message {
+  /**
+   * @inheritdoc
+   */
+  type: MessageType.META_SEND_DATA
+  /**
+   * The meta data object
+   */
+  payload: {
+    /**
+     * The list of events the parent has registered listeners for.
+     */
+    registeredEvents: string[]
+  }
 }
