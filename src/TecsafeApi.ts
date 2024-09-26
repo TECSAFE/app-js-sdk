@@ -42,12 +42,17 @@ export class TecsafeApi {
       localStorage.setItem('ofcp-bid', this.browserId)
     }
     const params = readUrlParams()
-    if (params.browserId && this.browserId !== params.browserId) {
+    if (!params.browserId) return
+    if (this.browserId !== params.browserId) {
       clearUrlParams()
       console.warn('[OFCP] Browser ID mismatch, clearing URL params')
       return
     }
-    this.openFullScreen(params.url)
+    try {
+      this.openFullScreen(params.url)
+    } catch (e) {
+      console.error('[OFCP] Failed to open full screen:', e)
+    }
   }
 
   private browserId: string
@@ -96,24 +101,6 @@ export class TecsafeApi {
   public getEventListeners(): { [key: string]: ((...args: any[]) => void)[] } {
     return this.eventListeners
   }
-
-  // /**
-  //  * Sets the onRequestLogin callback. If provided, and user is guest, some widget might display a login button.
-  //  * The function should open a login dialog or redirect the user to the login page.
-  //  * @param onRequestLogin The callback to set, or null to remove it
-  //  */
-  // public setOnRequestLogin(onRequestLogin: () => void | null): void {
-  //   this.onRequestLogin = onRequestLogin
-  // }
-
-  // /**
-  //  * Gets the onRequestLogin callback
-  //  * @see {@link setOnRequestLogin}
-  //  * @returns The onRequestLogin callback
-  //  */
-  // public getOnRequestLogin(): () => void | null {
-  //   return this.onRequestLogin
-  // }
 
   /**
    * Get the browser ID, a random string that is stored in localStorage.
