@@ -97,24 +97,6 @@ export class TecsafeApi {
     return this.eventListeners
   }
 
-  // /**
-  //  * Sets the onRequestLogin callback. If provided, and user is guest, some widget might display a login button.
-  //  * The function should open a login dialog or redirect the user to the login page.
-  //  * @param onRequestLogin The callback to set, or null to remove it
-  //  */
-  // public setOnRequestLogin(onRequestLogin: () => void | null): void {
-  //   this.onRequestLogin = onRequestLogin
-  // }
-
-  // /**
-  //  * Gets the onRequestLogin callback
-  //  * @see {@link setOnRequestLogin}
-  //  * @returns The onRequestLogin callback
-  //  */
-  // public getOnRequestLogin(): () => void | null {
-  //   return this.onRequestLogin
-  // }
-
   /**
    * Get the browser ID, a random string that is stored in localStorage.
    * This is NOT used for tracking, but to identify the browser if the user mistakenly shares the URL with OFCP data in it.
