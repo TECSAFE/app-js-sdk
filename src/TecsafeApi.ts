@@ -42,12 +42,17 @@ export class TecsafeApi {
       localStorage.setItem('ofcp-bid', this.browserId)
     }
     const params = readUrlParams()
-    if (params.browserId && this.browserId !== params.browserId) {
+    if (!params.browserId) return
+    if (this.browserId !== params.browserId) {
       clearUrlParams()
       console.warn('[OFCP] Browser ID mismatch, clearing URL params')
       return
     }
-    this.openFullScreen(params.url)
+    try {
+      this.openFullScreen(params.url)
+    } catch (e) {
+      console.error('[OFCP] Failed to open full screen:', e)
+    }
   }
 
   private browserId: string
