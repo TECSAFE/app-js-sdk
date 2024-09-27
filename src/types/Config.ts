@@ -13,6 +13,11 @@ export class OfcpConfig {
   public allowedOrigins: string[] = ['https://tecsafe.github.io']
 
   /**
+   * Iframe styles.transition property
+   */
+  public iframeTransition: string = 'height 0.3s ease-in-out'
+
+  /**
    * Styles configuration for the apps. TBD.
    */
   public styles: any = {}

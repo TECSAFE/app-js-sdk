@@ -13,6 +13,7 @@ import {
   SetTokenMessage,
   StylesSendDataMessage,
 } from './messages'
+import { SizeUpdateMessage } from './messages/SizeUpdate'
 
 /**
  * Base class for all widgets, providing common functionality
@@ -105,6 +106,7 @@ export class BaseWidget {
           type: MessageType.STYLES_SEND_DATA,
           payload: this.config.styles,
         } as StylesSendDataMessage)
+        break
 
       case MessageType.PING:
         this.sendMessage({
@@ -112,6 +114,11 @@ export class BaseWidget {
           payload: SDK_VERSION,
         } as PongMessage)
         break
+
+      case MessageType.SIZE_UPDATE:
+        this.iframe.style.height = `${
+          (event.data as SizeUpdateMessage).payload
+        }px`
 
       case MessageType.CALL_PARENT_EVENT:
         const callEvent = event.data as CallParentEventMessage
@@ -157,10 +164,12 @@ export class BaseWidget {
     this.preCreate()
     this.iframe = document.createElement('iframe')
     this.iframe.src = `${this.config.widgetBaseURL}/${this.uiPath}`
-    this.iframe.style.width = '100%'
-    this.iframe.style.height = '100%'
-    this.iframe.style.backgroundColor = 'transparent'
-    this.iframe.style.border = 'none'
+    const s = this.iframe.style
+    s.width = '100%'
+    s.height = '0px'
+    s.backgroundColor = 'transparent'
+    s.border = 'none'
+    s.transition = this.config.iframeTransition
     // this.iframe.setAttribute('allow', 'camera') // Maybe needed for the editor
     this.iframe.setAttribute('allowtransparency', 'true')
     this.el.appendChild(this.iframe)
@@ -174,7 +183,7 @@ export class BaseWidget {
    */
   public isOpen(): boolean {
     if (!this.iframe) return false
-    return this.iframe.style.display != 'none'
+    return this.iframe.style.display !== 'none'
   }
 
   /**

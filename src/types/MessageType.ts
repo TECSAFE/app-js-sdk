@@ -15,4 +15,5 @@ export enum MessageType {
   META_REQUEST_DATA = 'meta-request-data',
   META_SEND_DATA = 'meta-send-data',
   CALL_PARENT_EVENT = 'call-parent-event',
+  SIZE_UPDATE = 'size-update',
 }
