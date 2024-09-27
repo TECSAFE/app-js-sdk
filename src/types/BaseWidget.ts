@@ -119,6 +119,7 @@ export class BaseWidget {
         this.iframe.style.height = `${
           (event.data as SizeUpdateMessage).payload
         }px`
+        break
 
       case MessageType.CALL_PARENT_EVENT:
         const callEvent = event.data as CallParentEventMessage
